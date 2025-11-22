@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>El Juego del Grupo</title>
 <style>
-body { background: white; margin:0; font-family:Arial,sans-serif; text-align:center; user-select:none; overflow-x:hidden; }
+body { background:white; margin:0; font-family:Arial,sans-serif; text-align:center; user-select:none; overflow-x:hidden; }
 button { border:none; border-radius:10px; transition:0.2s; }
 #playButton { margin-top:200px; padding:20px 50px; font-size:30px; background:#007bff; color:white; cursor:pointer; }
 #playButton:hover { background:#0056c7; }
@@ -146,7 +146,6 @@ const enemigo=document.getElementById('enemigo');
 const stage2Continue=document.getElementById('stage2Continue');
 let balaInPistola=false;
 function showStage2(){ stage2.style.display='block'; window.scrollTo(0,0);}
-bala.addEventListener('dragstart', e=>e.dataTransfer.setData('id','bala'));
 bala.addEventListener('touchstart', e=>{
     bala.classList.add('dragging'); 
     bala.touchOffsetX=e.touches[0].clientX-bala.getBoundingClientRect().left;
@@ -199,7 +198,6 @@ let ballX=stage3Area.offsetWidth/2, ballY=stage3Area.offsetHeight/2;
 let ballSpeedX=2, ballSpeedY=2;
 let gameRunning=true;
 
-// PLAYER CONTROLS
 function movePlayer3(e){
     e.preventDefault();
     let y;
@@ -212,11 +210,7 @@ function movePlayer3(e){
 document.addEventListener('mousemove', movePlayer3);
 document.addEventListener('touchmove', movePlayer3, {passive:false});
 
-function showStage3(){
-    document.getElementById('stage3').style.display='block';
-    startGame3();
-}
-
+function showStage3(){ document.getElementById('stage3').style.display='block'; startGame3(); }
 function startGame3(){
     gameRunning=true;
     ballX=stage3Area.offsetWidth/2;
@@ -237,25 +231,31 @@ function gameLoop(){
     const melvinRect=stage3Melvin.getBoundingClientRect();
     const areaRect=stage3Area.getBoundingClientRect();
 
-    // PLAYER COLLISION
+    // Rebote jugador
     if(ballRect.right>=paddleRect.left && ballRect.bottom>=paddleRect.top && ballRect.top<=paddleRect.bottom){
-        ballSpeedX*=-1; ballX=paddleRect.left-areaRect.left-stage3Ball.offsetWidth;
+        ballSpeedX*=-1;
+        let impact=(ballY-(paddleRect.top-areaRect.top+stage3Paddle.offsetHeight/2))/stage3Paddle.offsetHeight;
+        ballSpeedY=impact*4;
+        ballX=paddleRect.left-areaRect.left-stage3Ball.offsetWidth;
     }
 
-    // MELVIN COLLISION
+    // Rebote Melvin
     if(ballRect.left<=melvinRect.right && ballRect.bottom>=melvinRect.top && ballRect.top<=melvinRect.bottom){
-        ballSpeedX*=-1; ballX=melvinRect.right-areaRect.left;
+        ballSpeedX*=-1;
+        let impact=(ballY-(melvinRect.top-areaRect.top+stage3Melvin.offsetHeight/2))/stage3Melvin.offsetHeight;
+        ballSpeedY=impact*4;
+        ballX=melvinRect.right-areaRect.left;
     }
 
-    // MELVIN AI PERFECTO
+    // MELVIN IA PERFECTO
     let predictedY=ballY + ballSpeedY*((melvinRect.right-ballX)/ballSpeedX);
     let targetY=predictedY-stage3Melvin.offsetHeight/2;
     if(targetY<0) targetY=0;
     if(targetY>stage3Area.offsetHeight-stage3Melvin.offsetHeight) targetY=stage3Area.offsetHeight-stage3Melvin.offsetHeight;
     stage3Melvin.style.top=targetY+'px';
 
-    // SI TOCA TU LADO -> reinicia
-    if(ballX<=0){
+    // Si toca tu lado -> reinicia
+    if(ballX+stage3Ball.offsetWidth>=stage3Area.offsetWidth){
         gameRunning=false;
         alert('¡Melvin ganó! Reinicia la etapa.');
         ballX=stage3Area.offsetWidth/2; ballY=stage3Area.offsetHeight/2;
@@ -268,6 +268,5 @@ function gameLoop(){
     requestAnimationFrame(gameLoop);
 }
 </script>
-
 </body>
 </html>

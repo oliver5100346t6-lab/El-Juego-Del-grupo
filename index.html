@@ -62,7 +62,7 @@ button { border:none; border-radius:10px; transition:0.2s; }
         height:50vh; 
         width:90vw; 
         max-width:600px; 
-        margin:250px auto 0 auto; /* margen superior más abajo */
+        margin:250px auto 0 auto; 
         background:#f0f0f0; 
         overflow:hidden;
         border-radius:10px;
@@ -190,19 +190,11 @@ function disparoExitoso(){
 stage2Continue.onclick=()=>{ stage2.style.display='none'; showStage3(); }
 
 // ETAPA 3
-const stage3=document.getElementById('stage3');
-const stage3Area=document.getElementById('stage3Area');
-const stage3Ball=document.getElementById('ball');
-const stage3Melvin=document.getElementById('melvin');
-const stage3Paddle=document.getElementById('playerPaddle');
-const stage3Continue=document.getElementById('stage3Continue');
-
 let ballSpeedX3=2, ballSpeedY3=2, gameRunning3=true; 
 let melvinSpeed=8; 
-
 function showStage3(){ stage3.style.display='block'; window.scrollTo(0,0); startGame3(); }
 
-function movePlayer(e){
+function movePlayer3(e){
     e.preventDefault();
     let y;
     if(e.touches) y=e.touches[0].clientY - stage3Area.getBoundingClientRect().top - stage3Paddle.offsetHeight/2;
@@ -211,12 +203,13 @@ function movePlayer(e){
     if(y>stage3Area.offsetHeight-stage3Paddle.offsetHeight) y=stage3Area.offsetHeight-stage3Paddle.offsetHeight;
     stage3Paddle.style.top=y+'px';
 }
-document.addEventListener('mousemove', movePlayer);
-document.addEventListener('touchmove', movePlayer, {passive:false});
+document.addEventListener('mousemove', movePlayer3);
+document.addEventListener('touchmove', movePlayer3, {passive:false});
 
 function startGame3(){
     gameRunning3=true;
     let ballPos={x:stage3Area.offsetWidth/2, y:stage3Area.offsetHeight/2};
+
     function moveBall(){
         if(!gameRunning3) return;
         ballPos.x+=ballSpeedX3;
@@ -228,24 +221,29 @@ function startGame3(){
         const areaRect=stage3Area.getBoundingClientRect();
         const melvinRect=stage3Melvin.getBoundingClientRect();
 
+        // Rebote jugador
         if(ballRect.right>=paddleRect.left && ballRect.bottom>=paddleRect.top && ballRect.top<=paddleRect.bottom){
             ballSpeedX3*=-1; 
             ballPos.x=paddleRect.left-stage3Ball.offsetWidth-areaRect.left;
         }
 
+        // Rebote Melvin
         if(ballRect.left<=melvinRect.right && ballRect.bottom>=melvinRect.top && ballRect.top<=melvinRect.bottom){
             ballSpeedX3*=-1; 
             ballPos.x=melvinRect.right-areaRect.left;
         }
 
-        // Inteligencia de Melvin
-        const melvinCenter=parseFloat(stage3Melvin.style.top)+stage3Melvin.offsetHeight/2-areaRect.top;
-        const ballCenter=ballPos.y+stage3Ball.offsetHeight/2;
-        if(ballCenter>melvinCenter+5) stage3Melvin.style.top=Math.min(stage3Area.offsetHeight-stage3Melvin.offsetHeight, parseFloat(stage3Melvin.style.top)+melvinSpeed)+'px';
-        if(ballCenter<melvinCenter-5) stage3Melvin.style.top=Math.max(0, parseFloat(stage3Melvin.style.top)-melvinSpeed)+'px';
+        // Inteligencia perfecta de Melvin
+        const predictedY = ballPos.y + (ballSpeedY3 * ((melvinRect.right-ballPos.x)/ballSpeedX3));
+        let targetY = predictedY - stage3Melvin.offsetHeight/2;
+        if(targetY<0) targetY=0;
+        if(targetY>stage3Area.offsetHeight-stage3Melvin.offsetHeight) targetY=stage3Area.offsetHeight-stage3Melvin.offsetHeight;
+        stage3Melvin.style.top = targetY + 'px';
 
+        // Rebote final si la pelota toca el lado derecho
         if(ballPos.x+stage3Ball.offsetWidth>=stage3Area.offsetWidth){ resetStage3(); return; }
 
+        // Si la pelota toca tu lado
         if(ballPos.x<=0){
             gameRunning3=false;
             const audio=new Audio('ingaliator-1x1x1x1.mp3'); audio.volume=0.5; audio.play();

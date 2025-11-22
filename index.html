@@ -259,7 +259,7 @@ function gameLoop(){
     if(targetY < 0) targetY = 0;
     if(targetY > stage3Area.offsetHeight - stage3Melvin.offsetHeight) targetY = stage3Area.offsetHeight - stage3Melvin.offsetHeight;
     // Mover más lento
-    stage3Melvin.style.top = parseFloat(stage3Melvin.style.top || 0) + (targetY - parseFloat(stage3Melvin.style.top || 0))*0.08 + 'px';
+    stage3Melvin.style.top = parseFloat(stage3Melvin.style.top || 0) + (targetY - parseFloat(stage3Melvin.style.top || 0))*0.04 + 'px';
 
     // Si toca tu lado -> reinicia TODO
     if(ballX + stage3Ball.offsetWidth >= stage3Area.offsetWidth){

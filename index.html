@@ -58,11 +58,20 @@ button { border:none; border-radius:10px; transition:0.2s; }
 <!-- ETAPA 3 -->
 <div id="stage3">
 <div id="stage3Area" style="position:relative; height:60vh; width:90vw; margin:0 auto; background:#f0f0f0; overflow:hidden;">
-<div id="leftLine" style="position:absolute; left:0; top:0; width:10px; height:100%; background:blue;"></div>
-<div id="rightLine" style="position:absolute; right:0; top:0; width:10px; height:100%; background:blue;"></div>
-<img src="IMG_20251028_160719132_BURST001.jpg" id="melvin" style="position:absolute; left:0; top:50%; transform:translateY(-50%); width:10vw; max-width:100px;">
-<div id="playerPaddle" style="position:absolute; right:10px; top:50%; width:20px; height:15%; background:blue; transform:translateY(-50%);"></div>
-<div id="ball" style="position:absolute; width:20px; height:20px; border-radius:50%; background:blue; left:50%; top:50%; transform:translate(-50%, -50%);"></div>
+  <!-- Líneas con margen interno para no estar pegadas -->
+  <div id="leftLine" style="position:absolute; left:5%; top:0; width:10px; height:100%; background:blue;"></div>
+  <div id="rightLine" style="position:absolute; right:5%; top:0; width:10px; height:100%; background:blue;"></div>
+  
+  <!-- Melvin en el lado izquierdo con margen -->
+  <img src="IMG_20251028_160719132_BURST001.jpg" id="melvin" 
+       style="position:absolute; left:5%; top:50%; transform:translateY(-50%); width:10vw; max-width:100px;">
+
+  <!-- Paddle jugador con margen del lado derecho -->
+  <div id="playerPaddle" 
+       style="position:absolute; right:5%; top:50%; width:20px; height:15%; background:blue; transform:translateY(-50%);"></div>
+
+  <div id="ball" 
+       style="position:absolute; width:20px; height:20px; border-radius:50%; background:blue; left:50%; top:50%; transform:translate(-50%, -50%);"></div>
 </div>
 <button id="stage3Continue">Continuar</button>
 </div>

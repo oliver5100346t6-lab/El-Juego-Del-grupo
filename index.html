@@ -59,10 +59,10 @@ button { border:none; border-radius:10px; transition:0.2s; }
 <div id="stage3">
 <div id="stage3Area" style="
         position:relative; 
-        height:60vh; 
+        height:50vh; 
         width:90vw; 
         max-width:600px; 
-        margin:80px auto 0 auto; /* <- margen superior aumentado */
+        margin:180px auto 0 auto; /* <- margen superior grande para bajar todo */
         background:#f0f0f0; 
         overflow:hidden;
         border-radius:10px;
@@ -172,8 +172,6 @@ bala.addEventListener('touchend', e=>{
         bala.style.display='none'; balaInPistola=true; alert('Bala lista para disparar!');
     } else { bala.style.left=''; bala.style.top=''; bala.style.position=''; bala.style.zIndex=''; }
 });
-pistola.addEventListener('dragover', e=>e.preventDefault());
-pistola.addEventListener('drop', e=>{ if(e.dataTransfer.getData('id')==='bala'){ bala.style.display='none'; balaInPistola=true; alert('Bala lista para disparar!'); }});
 pistola.addEventListener('click',()=>{
     if(!balaInPistola) return;
     pistola.style.transition='transform 0.5s'; pistola.style.transform='rotate(360deg)';
@@ -202,7 +200,8 @@ const stage3Melvin=document.getElementById('melvin');
 const stage3Paddle=document.getElementById('playerPaddle');
 const stage3Continue=document.getElementById('stage3Continue');
 
-let ballSpeedX3=4, ballSpeedY3=3, gameRunning3=true;
+let ballSpeedX3=6, ballSpeedY3=5, gameRunning3=true;
+let melvinSpeed=5;
 
 function showStage3(){ stage3.style.display='block'; window.scrollTo(0,0); startGame3(); }
 
@@ -225,27 +224,41 @@ function startGame3(){
         ballPos.x+=ballSpeedX3;
         ballPos.y+=ballSpeedY3;
         if(ballPos.y<=0 || ballPos.y+stage3Ball.offsetHeight>=stage3Area.offsetHeight) ballSpeedY3*=-1;
+
         const paddleRect=stage3Paddle.getBoundingClientRect();
         const ballRect=stage3Ball.getBoundingClientRect();
         const areaRect=stage3Area.getBoundingClientRect();
         const melvinRect=stage3Melvin.getBoundingClientRect();
+
+        // Rebote jugador
         if(ballRect.right>=paddleRect.left && ballRect.bottom>=paddleRect.top && ballRect.top<=paddleRect.bottom){
-            ballSpeedX3*=-1; ballPos.x=paddleRect.left-stage3Ball.offsetWidth-areaRect.left;
+            ballSpeedX3*=-1; 
+            ballPos.x=paddleRect.left-stage3Ball.offsetWidth-areaRect.left;
         }
+
+        // Rebote Melvin
         if(ballRect.left<=melvinRect.right && ballRect.bottom>=melvinRect.top && ballRect.top<=melvinRect.bottom){
-            ballSpeedX3*=-1; ballPos.x=melvinRect.right-areaRect.left;
+            ballSpeedX3*=-1; 
+            ballPos.x=melvinRect.right-areaRect.left;
         }
+
+        // Movimiento de Melvin más agresivo
         const melvinCenter=parseFloat(stage3Melvin.style.top)+stage3Melvin.offsetHeight/2-areaRect.top;
         const ballCenter=ballPos.y+stage3Ball.offsetHeight/2;
-        if(ballCenter>melvinCenter) stage3Melvin.style.top=Math.min(stage3Area.offsetHeight-stage3Melvin.offsetHeight, parseFloat(stage3Melvin.style.top)+2)+'px';
-        if(ballCenter<melvinCenter) stage3Melvin.style.top=Math.max(0, parseFloat(stage3Melvin.style.top)-2)+'px';
+        if(ballCenter>melvinCenter) stage3Melvin.style.top=Math.min(stage3Area.offsetHeight-stage3Melvin.offsetHeight, parseFloat(stage3Melvin.style.top)+melvinSpeed)+'px';
+        if(ballCenter<melvinCenter) stage3Melvin.style.top=Math.max(0, parseFloat(stage3Melvin.style.top)-melvinSpeed)+'px';
+
+        // Rebote final
         if(ballPos.x+stage3Ball.offsetWidth>=stage3Area.offsetWidth){ resetStage3(); return; }
+
+        // Si la pelota toca tu lado
         if(ballPos.x<=0){
             gameRunning3=false;
             const audio=new Audio('ingaliator-1x1x1x1.mp3'); audio.volume=0.5; audio.play();
             stage3Melvin.style.filter='hue-rotate(0deg) saturate(10)'; stage3Melvin.style.transition='opacity 1s'; stage3Melvin.style.opacity=0;
             stage3Continue.style.transform='translateY(0)'; stage3Continue.style.opacity=1; stage3Continue.style.pointerEvents='auto';
         }
+
         stage3Ball.style.left=ballPos.x+'px';
         stage3Ball.style.top=ballPos.y+'px';
         requestAnimationFrame(moveBall);
@@ -254,7 +267,7 @@ function startGame3(){
 }
 
 function resetStage3(){
-    ballSpeedX3=4; ballSpeedY3=3;
+    ballSpeedX3=6; ballSpeedY3=5;
     stage3Ball.style.left='50%'; stage3Ball.style.top='50%';
     stage3Melvin.style.top='50%';
 }

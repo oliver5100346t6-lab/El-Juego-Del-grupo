@@ -27,7 +27,7 @@
         cursor: pointer;
     }
     #playButton:hover { background: #0056c7; }
-    #gameArea, #stage2 { display: none; margin-top: 40px; }
+    #gameArea, #stage2, #stage3 { display: none; margin-top: 40px; }
 
     .drag {
         width: 30vw; max-width: 150px;
@@ -47,16 +47,18 @@
         background-size: cover;
         background-position: center;
     }
-    #continueBtn {
+    #continueBtn, #stage2Continue, #stage3Continue {
         margin-top: 5vw;
         padding: 15px 40px;
         font-size: 20px;
-        background: #007bff;
-        color: white;
-        cursor: not-allowed;
+        border-radius: 10px;
         opacity: 0.5;
+        cursor: not-allowed;
         pointer-events: none;
     }
+    #stage2Continue { background:#28a745; }
+    #stage3Continue { background:#28a745; }
+
     .shake { animation: shake 0.3s; }
     @keyframes shake {
         0% { transform: translateX(0px); }
@@ -67,18 +69,15 @@
     }
     .fade { animation: fadeOut 0.6s forwards; }
     @keyframes fadeOut { to { opacity: 0; transform: scale(0.5); } }
-    #stage2Continue {
-        display: block;
-        margin: 30px auto 0 auto;
-        padding:15px 40px;
-        font-size:20px;
-        background:#28a745;
-        color:white;
-        cursor:pointer;
-        transform:translateY(50px);
-        opacity:0;
-        transition:all 0.5s;
-    }
+    #stage2Continue, #stage3Continue { display: block; margin: 30px auto 0 auto; transform: translateY(50px); opacity:0; transition:all 0.5s; }
+
+    /* Etapa 3 */
+    #stage3Area { display:flex; justify-content:space-between; align-items:center; margin-top:50px; position:relative; height:50vh; }
+    #melvin { width:20vw; max-width:150px; height:auto; }
+    #playerPaddle { width:20px; background:blue; position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; }
+    #ball { width:20px; height:20px; border-radius:50%; background:blue; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); }
+    #leftLine, #rightLine { width:5px; background:blue; position:absolute; top:0; bottom:0; }
+    #leftLine { left:0; } #rightLine { right:0; }
 </style>
 </head>
 <body>
@@ -113,139 +112,143 @@
     <button id="stage2Continue">Continuar</button>
 </div>
 
+<!-- ETAPA 3 -->
+<div id="stage3">
+    <div id="stage3Area">
+        <img src="IMG_20251028_160719132_BURST001.jpg" id="melvin">
+        <div id="playerPaddle"></div>
+        <div id="leftLine"></div>
+        <div id="rightLine"></div>
+        <div id="ball"></div>
+    </div>
+    <button id="stage3Continue">Continuar</button>
+</div>
+
 <script>
 // BOTON A JUGAR
 const playButton = document.getElementById("playButton");
 const gameArea = document.getElementById("gameArea");
-playButton.onclick = () => {
-    playButton.style.display = "none";
-    gameArea.style.display = "block";
-};
+playButton.onclick = () => { playButton.style.display = "none"; gameArea.style.display = "block"; };
 
-// ETAPA 1 LOGICA
+// ETAPA 1 - DRAG & DROP FLUIDO
 let correct = 0;
-document.querySelectorAll(".drag").forEach(drag => {
-    drag.addEventListener("dragstart", e => e.dataTransfer.setData("id", drag.id));
-    drag.addEventListener("touchstart", e => drag.dataset.touch=true);
-    drag.addEventListener("touchmove", e => {
-        const touch = e.touches[0];
-        drag.style.position = 'absolute';
-        drag.style.left = (touch.clientX - drag.offsetWidth/2) + 'px';
-        drag.style.top = (touch.clientY - drag.offsetHeight/2) + 'px';
+const drags = document.querySelectorAll('.drag');
+function makeDraggable(el){
+    let offsetX=0, offsetY=0;
+    function move(x,y){
+        el.style.position='absolute';
+        el.style.left=(x-offsetX)+'px';
+        el.style.top=(y-offsetY)+'px';
+    }
+    el.addEventListener('mousedown', e=>{
+        offsetX = e.offsetX; offsetY = e.offsetY;
+        function mouseMove(e){ move(e.clientX,e.clientY); }
+        function mouseUp(){ window.removeEventListener('mousemove', mouseMove); window.removeEventListener('mouseup', mouseUp); }
+        window.addEventListener('mousemove', mouseMove); window.addEventListener('mouseup', mouseUp);
     });
-    drag.addEventListener("touchend", e => {
-        const touch = e.changedTouches[0];
-        document.querySelectorAll(".dropzone").forEach(zone => {
-            const rect = zone.getBoundingClientRect();
-            if(touch.clientX >= rect.left && touch.clientX <= rect.right && touch.clientY >= rect.top && touch.clientY <= rect.bottom){
-                handleDrop(zone, drag.id);
-            } else { drag.style.position='relative'; drag.style.left=''; drag.style.top=''; }
-        });
+    el.addEventListener('touchstart', e=>{ const t=e.touches[0]; offsetX=t.targetTouches[0].clientX - el.getBoundingClientRect().left; offsetY=t.targetTouches[0].clientY - el.getBoundingClientRect().top; });
+    el.addEventListener('touchmove', e=>{
+        e.preventDefault(); const t=e.touches[0]; move(t.clientX,t.clientY);
     });
-});
+}
+drags.forEach(makeDraggable);
 
-document.querySelectorAll(".dropzone").forEach(zone => {
-    zone.addEventListener("dragover", e => e.preventDefault());
-    zone.addEventListener("drop", e => {
-        const droppedId = e.dataTransfer.getData("id");
-        handleDrop(zone, droppedId);
-    });
-});
-
-function handleDrop(zone, droppedId){
-    if(zone.dataset.match === droppedId){
-        document.getElementById(droppedId).classList.add("fade");
-        setTimeout(()=>document.getElementById(droppedId).style.display='none',600);
-        zone.style.border = "3px solid #00cc44";
-        correct++;
+// Dropzone logic similar al anterior
+function handleDrop(zone,droppedId){
+    if(zone.dataset.match===droppedId){
+        document.getElementById(droppedId).classList.add('fade'); setTimeout(()=>document.getElementById(droppedId).style.display='none',600);
+        zone.style.border='3px solid #00cc44'; correct++;
         if(correct===3){
-            const btn=document.getElementById("continueBtn");
-            btn.style.opacity=1; btn.style.cursor='pointer'; btn.style.pointerEvents='auto'; btn.innerHTML='Continuar ✔';
+            const btn=document.getElementById('continueBtn'); btn.style.opacity=1; btn.style.cursor='pointer'; btn.style.pointerEvents='auto'; btn.innerHTML='Continuar ✔';
         }
     } else {
-        document.body.classList.add("shake");
-        setTimeout(()=>document.body.classList.remove("shake"),300);
+        document.body.classList.add('shake'); setTimeout(()=>document.body.classList.remove('shake'),300);
     }
 }
-
-document.getElementById("continueBtn").onclick = () => {
-    if(correct<3){
-        document.body.classList.add("shake");
-        setTimeout(()=>document.body.classList.remove("shake"),300);
-    } else {
-        // Ocultar Etapa 1
-        gameArea.style.display='none';
-        // Mostrar Etapa 2
-        showStage2();
-    }
+document.getElementById('continueBtn').onclick=()=>{
+    if(correct<3){ document.body.classList.add('shake'); setTimeout(()=>document.body.classList.remove('shake'),300); }
+    else{ gameArea.style.display='none'; showStage2(); }
 };
 
 // ETAPA 2
-const stage2 = document.getElementById("stage2");
-const bala = document.getElementById("bala");
-const pistola = document.getElementById("pistola");
-const enemigo = document.getElementById("enemigo");
-const stage2Continue = document.getElementById("stage2Continue");
-
+const stage2 = document.getElementById('stage2');
+const bala=document.getElementById('bala');
+const pistola=document.getElementById('pistola');
+const enemigo=document.getElementById('enemigo');
+const stage2Continue=document.getElementById('stage2Continue');
+let balaInPistola=false;
 function showStage2(){ stage2.style.display='block'; window.scrollTo(0,0); }
 
-let balaInPistola = false;
-
-// Drag & Drop bala -> pistola
-function handleDropBala(targetX,targetY){
-    const rect=pistola.getBoundingClientRect();
-    if(targetX>=rect.left && targetX<=rect.right && targetY>=rect.top && targetY<=rect.bottom){
-        bala.style.display='none';
-        balaInPistola=true;
-    }
-}
-
-bala.addEventListener("dragstart", e=>e.dataTransfer.setData("id","bala"));
-pistola.addEventListener("dragover", e=>e.preventDefault());
-pistola.addEventListener("drop", e=>handleDropBala(e.clientX,e.clientY));
-
-bala.addEventListener("touchmove", e=>{
-    const touch=e.touches[0];
-    bala.style.position='absolute'; bala.style.left=(touch.clientX-bala.offsetWidth/2)+'px';
-    bala.style.top=(touch.clientY-bala.offsetHeight/2)+'px';
-});
-bala.addEventListener("touchend", e=>{
-    const touch=e.changedTouches[0];
-    handleDropBala(touch.clientX,touch.clientY);
-    bala.style.position='relative'; bala.style.left=''; bala.style.top='';
-});
-
-pistola.addEventListener("click", () => {
+bala.addEventListener('mousedown',()=>{}); // Se mantiene draggable con anterior
+bala.addEventListener('touchmove', e=>{});
+pistola.addEventListener('click',()=>{
     if(!balaInPistola) return;
     pistola.style.transition='transform 0.5s'; pistola.style.transform='rotate(360deg)';
-    setTimeout(()=>{
-        pistola.style.transform='rotate(0deg)';
-        if(Math.random()<0.875){ disparoExitoso(); } else { alert('Mala suerte, la pistola no disparó'); bala.style.display='block'; balaInPistola=false; }
+    setTimeout(()=>{ pistola.style.transform='rotate(0deg)';
+        if(Math.random()<0.875) disparoExitoso();
+        else { alert('Mala suerte, la pistola no disparó'); bala.style.display='block'; balaInPistola=false; }
     },500);
 });
-
 function disparoExitoso(){
     pistola.style.transition='transform 0.1s'; pistola.style.transform='rotate(-10deg)';
     setTimeout(()=>pistola.style.transform='rotate(0deg)',100);
-
-    const spark=document.createElement('div');
-    spark.style.position='absolute'; spark.style.width='20px'; spark.style.height='20px'; spark.style.background='yellow'; spark.style.borderRadius='50%';
-    spark.style.left=pistola.offsetLeft+pistola.offsetWidth+'px'; spark.style.top=pistola.offsetTop+pistola.offsetHeight/2-10+'px';
-    document.body.appendChild(spark);
-    setTimeout(()=>spark.remove(),500);
-
     document.body.classList.add('shake'); setTimeout(()=>document.body.classList.remove('shake'),1000);
     const audio=new Audio('ARGHHH.mp3'); audio.play();
-
     enemigo.style.transition='opacity 1s'; enemigo.style.opacity=0;
-
-    // Desactivar pistola
     pistola.style.pointerEvents='none';
+    setTimeout(()=>{ stage2Continue.style.transform='translateY(0)'; stage2Continue.style.opacity=1; stage2Continue.style.pointerEvents='auto'; },1000);
+}
+stage2Continue.onclick=()=>{ stage2.style.display='none'; showStage3(); };
 
-    setTimeout(()=>{
-        stage2Continue.style.transform='translateY(0)';
-        stage2Continue.style.opacity=1;
-    },1000);
+// ETAPA 3
+const stage3=document.getElementById('stage3');
+const melvin=document.getElementById('melvin');
+const playerPaddle=document.getElementById('playerPaddle');
+const ball=document.getElementById('ball');
+const stage3Continue=document.getElementById('stage3Continue');
+let ballSpeedX=4, ballSpeedY=3;
+function showStage3(){ stage3.style.display='block'; window.scrollTo(0,0); startGame3(); }
+
+function startGame3(){
+    let paddleY=playerPaddle.offsetTop;
+    document.addEventListener('mousemove', e=>{
+        paddleY=e.clientY-playerPaddle.offsetHeight/2;
+        if(paddleY<0) paddleY=0;
+        if(paddleY>stage3Area.offsetHeight-playerPaddle.offsetHeight) paddleY=stage3Area.offsetHeight-playerPaddle.offsetHeight;
+        playerPaddle.style.top=paddleY+'px';
+    });
+    document.addEventListener('touchmove', e=>{
+        let t=e.touches[0]; paddleY=t.clientY-playerPaddle.offsetHeight/2;
+        if(paddleY<0) paddleY=0;
+        if(paddleY>stage3Area.offsetHeight-playerPaddle.offsetHeight) paddleY=stage3Area.offsetHeight-playerPaddle.offsetHeight;
+        playerPaddle.style.top=paddleY+'px';
+    });
+
+    function moveBall(){
+        let ballX=ball.offsetLeft, ballY=ball.offsetTop;
+        ballX+=ballSpeedX; ballY+=ballSpeedY;
+        if(ballY<=0 || ballY>=stage3Area.offsetHeight-ball.offsetHeight) ballSpeedY*=-1;
+        // Colisión paddle derecho
+        if(ballX+ball.offsetWidth>=playerPaddle.offsetLeft && ballY+ball.offsetHeight>=playerPaddle.offsetTop && ballY<=playerPaddle.offsetTop+playerPaddle.offsetHeight){ ballSpeedX*=-1; }
+        // Colisión Melvin (izquierda)
+        if(ballX<=melvin.offsetWidth && ballY+ball.offsetHeight>=melvin.offsetTop && ballY<=melvin.offsetTop+melvin.offsetHeight){ ballSpeedX*=-1; }
+        // Check fail
+        if(ballX<=0) resetStage3();
+        ball.style.left=ballX+'px'; ball.style.top=ballY+'px';
+        if(stage3.style.display==='block') requestAnimationFrame(moveBall);
+        if(ballX+ball.offsetWidth>=stage3Area.offsetWidth-10){ // Si llego al final lado derecho gana jugador
+            // Sonido de victoria
+            const audio=new Audio('ingaliator-1x1x1x1.mp3'); audio.play();
+            melvin.style.filter='hue-rotate(0deg) saturate(10)'; melvin.style.transition='opacity 1s'; melvin.style.opacity=0;
+            setTimeout(()=>{ stage3Continue.style.transform='translateY(0)'; stage3Continue.style.opacity=1; stage3Continue.style.pointerEvents='auto'; },1000);
+        }
+    }
+    moveBall();
+}
+
+function resetStage3(){
+    ball.style.left='50%'; ball.style.top='50%';
+    startGame3();
 }
 </script>
 

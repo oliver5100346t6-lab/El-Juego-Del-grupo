@@ -253,12 +253,12 @@ function gameLoop(){
         ballX = stage3Melvin.offsetLeft + stage3Melvin.offsetWidth;
     }
 
-    // IA PERFECTA MUY MUY LENTA
+    // IA PERFECTA ULTRA LENTA
     let predictedY = ballY + ballSpeedY*((stage3Melvin.offsetLeft + stage3Melvin.offsetWidth - ballX)/ballSpeedX);
     let targetY = predictedY - stage3Melvin.offsetHeight/2;
     if(targetY < 0) targetY = 0;
     if(targetY > stage3Area.offsetHeight - stage3Melvin.offsetHeight) targetY = stage3Area.offsetHeight - stage3Melvin.offsetHeight;
-    stage3Melvin.style.top = parseFloat(stage3Melvin.style.top || 0) + (targetY - parseFloat(stage3Melvin.style.top || 0))*0.01 + 'px';
+    stage3Melvin.style.top = parseFloat(stage3Melvin.style.top || 0) + (targetY - parseFloat(stage3Melvin.style.top || 0))*0.002 + 'px'; // MUY LENTO
 
     // Si toca tu lado -> reinicia SOLO etapa 3
     if(ballX + stage3Ball.offsetWidth >= stage3Area.offsetWidth){

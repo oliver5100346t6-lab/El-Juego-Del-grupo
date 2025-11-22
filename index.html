@@ -5,78 +5,77 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>El Juego del Grupo</title>
 <style>
-    body {
-        background: white;
-        margin: 0;
-        font-family: Arial, sans-serif;
-        text-align: center;
-        user-select: none;
-        overflow-x: hidden;
-    }
-    button {
-        border: none;
-        border-radius: 10px;
-        transition: 0.2s;
-    }
-    #playButton {
-        margin-top: 200px;
-        padding: 20px 50px;
-        font-size: 30px;
-        background: #007bff;
-        color: white;
-        cursor: pointer;
-    }
-    #playButton:hover { background: #0056c7; }
-    #gameArea, #stage2, #stage3 { display: none; margin-top: 40px; }
+body {
+    background: white;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    user-select: none;
+    overflow-x: hidden;
+}
+button {
+    border: none;
+    border-radius: 10px;
+    transition: 0.2s;
+}
+#playButton {
+    margin-top: 200px;
+    padding: 20px 50px;
+    font-size: 30px;
+    background: #007bff;
+    color: white;
+    cursor: pointer;
+}
+#playButton:hover { background: #0056c7; }
+#gameArea, #stage2, #stage3 { display: none; margin-top: 40px; }
 
-    .drag {
-        width: 30vw; max-width: 150px;
-        height: 30vw; max-height: 150px;
-        border-radius: 10px;
-        cursor: grab;
-        position: relative;
-        margin: 2vw;
-        transition: transform 0.2s, opacity 0.2s;
-    }
-    .drag:active {
-        transform: scale(1.1);
-        opacity: 0.8;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-    }
+.drag {
+    width: 30vw; max-width: 150px;
+    height: 30vw; max-height: 150px;
+    border-radius: 10px;
+    cursor: grab;
+    position: relative;
+    margin: 2vw;
+    transition: transform 0.2s, opacity 0.2s;
+}
+.drag:active {
+    transform: scale(1.1);
+    opacity: 0.8;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+.dropzone {
+    width: 32vw; max-width: 160px;
+    height: 32vw; max-height: 160px;
+    border: 3px dashed #888;
+    border-radius: 10px;
+    display: inline-block;
+    margin: 2vw;
+    background-size: cover;
+    background-position: center;
+}
+#continueBtn, #stage2Continue, #stage3Continue {
+    margin-top: 5vw;
+    padding: 15px 40px;
+    font-size: 20px;
+    border-radius: 10px;
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+#stage2Continue { background:#28a745; }
+#stage3Continue { background:#28a745; }
 
-    .dropzone {
-        width: 32vw; max-width: 160px;
-        height: 32vw; max-height: 160px;
-        border: 3px dashed #888;
-        border-radius: 10px;
-        display: inline-block;
-        margin: 2vw;
-        background-size: cover;
-        background-position: center;
-    }
-    #continueBtn, #stage2Continue, #stage3Continue {
-        margin-top: 5vw;
-        padding: 15px 40px;
-        font-size: 20px;
-        border-radius: 10px;
-        opacity: 0.5;
-        cursor: not-allowed;
-        pointer-events: none;
-    }
-    #stage2Continue { background:#28a745; }
-    #stage3Continue { background:#28a745; }
-
-    .shake { animation: shake 0.3s; }
-    @keyframes shake {
-        0% { transform: translateX(0px); }
-        25% { transform: translateX(-10px); }
-        50% { transform: translateX(10px); }
-        75% { transform: translateX(-10px); }
-        100% { transform: translateX(0px); }
-    }
-    .fade { animation: fadeOut 0.6s forwards; }
-    @keyframes fadeOut { to { opacity: 0; transform: scale(0.5); } }
-    #stage2Continue, #stage3Continue { display: block; margin: 30px auto 0 auto; transform: translateY(50px); opacity:0; transition:all 0.5s; }
+.shake { animation: shake 0.3s; }
+@keyframes shake {
+    0% { transform: translateX(0px); }
+    25% { transform: translateX(-10px); }
+    50% { transform: translateX(10px); }
+    75% { transform: translateX(-10px); }
+    100% { transform: translateX(0px); }
+}
+.fade { animation: fadeOut 0.6s forwards; }
+@keyframes fadeOut { to { opacity: 0; transform: scale(0.5); } }
+#stage2Continue, #stage3Continue { display: block; margin: 30px auto 0 auto; transform: translateY(50px); opacity:0; transition:all 0.5s; }
 </style>
 </head>
 <body>
@@ -128,14 +127,13 @@
 // BOTON A JUGAR
 const playButton = document.getElementById("playButton");
 const gameArea = document.getElementById("gameArea");
-playButton.onclick = () => { playButton.style.display = "none"; gameArea.style.display = "block"; };
+playButton.onclick = () => { playButton.style.display = "none"; gameArea.style.display = "block"; }
 
-// ETAPA 1 - DRAG & DROP CLÁSICO
+// ETAPA 1 - DRAG & DROP
 let correct = 0;
 document.querySelectorAll('.drag').forEach(drag => {
     drag.addEventListener('dragstart', e => e.dataTransfer.setData('id', drag.id));
 });
-
 document.querySelectorAll('.dropzone').forEach(zone => {
     zone.addEventListener('dragover', e => e.preventDefault());
     zone.addEventListener('drop', e => {
@@ -143,7 +141,6 @@ document.querySelectorAll('.dropzone').forEach(zone => {
         handleDrop(zone, droppedId);
     });
 });
-
 function handleDrop(zone, droppedId){
     if(zone.dataset.match === droppedId){
         document.getElementById(droppedId).classList.add('fade');
@@ -159,7 +156,6 @@ function handleDrop(zone, droppedId){
         setTimeout(()=>document.body.classList.remove('shake'),300);
     }
 }
-
 document.getElementById('continueBtn').onclick=()=>{
     if(correct<3){ document.body.classList.add('shake'); setTimeout(()=>document.body.classList.remove('shake'),300); }
     else{ gameArea.style.display='none'; showStage2(); }
@@ -173,18 +169,12 @@ const enemigo=document.getElementById('enemigo');
 const stage2Continue=document.getElementById('stage2Continue');
 let balaInPistola=false;
 function showStage2(){ stage2.style.display='block'; window.scrollTo(0,0); }
-
 bala.addEventListener('dragstart', e => e.dataTransfer.setData('id','bala'));
 pistola.addEventListener('dragover', e => e.preventDefault());
 pistola.addEventListener('drop', e => {
     const id = e.dataTransfer.getData('id');
-    if(id==='bala'){
-        bala.style.display='none';
-        balaInPistola=true;
-        alert('Bala lista para disparar!');
-    }
+    if(id==='bala'){ bala.style.display='none'; balaInPistola=true; alert('Bala lista para disparar!'); }
 });
-
 pistola.addEventListener('click',()=>{
     if(!balaInPistola) return;
     pistola.style.transition='transform 0.5s'; pistola.style.transform='rotate(360deg)';
@@ -206,68 +196,87 @@ function disparoExitoso(){
 stage2Continue.onclick=()=>{ stage2.style.display='none'; showStage3(); };
 
 // ETAPA 3
+const stage3=document.getElementById('stage3');
+const stage3Area=document.getElementById('stage3Area');
 const stage3Ball=document.getElementById('ball');
 const stage3Melvin=document.getElementById('melvin');
 const stage3Paddle=document.getElementById('playerPaddle');
+const stage3Continue=document.getElementById('stage3Continue');
+
 let ballSpeedX3=4, ballSpeedY3=3, gameRunning3=true;
+
 function showStage3(){ stage3.style.display='block'; window.scrollTo(0,0); startGame3(); }
+
+// Paddle jugador movimiento
+function movePlayer(e){
+    let y;
+    if(e.touches) y=e.touches[0].clientY - stage3Area.getBoundingClientRect().top - stage3Paddle.offsetHeight/2;
+    else y=e.clientY - stage3Area.getBoundingClientRect().top - stage3Paddle.offsetHeight/2;
+    if(y<0) y=0;
+    if(y>stage3Area.offsetHeight-stage3Paddle.offsetHeight) y=stage3Area.offsetHeight-stage3Paddle.offsetHeight;
+    stage3Paddle.style.top=y+'px';
+}
+document.addEventListener('mousemove', movePlayer);
+document.addEventListener('touchmove', movePlayer);
 
 function startGame3(){
     gameRunning3=true;
-    let ballPos={x:stage3Area.offsetWidth/2,y:stage3Area.offsetHeight/2};
+    let ballPos={x:stage3Area.offsetWidth/2, y:stage3Area.offsetHeight/2};
 
     function moveBall(){
         if(!gameRunning3) return;
-        ballPos.x+=ballSpeedX3; ballPos.y+=ballSpeedY3;
-        if(ballPos.y<=0||ballPos.y>=stage3Area.offsetHeight-stage3Ball.offsetHeight) ballSpeedY3*=-1;
 
-        // Paddle jugador
-        let playerTop=parseFloat(stage3Paddle.style.top);
-        if(ballPos.x + stage3Ball.offsetWidth >= stage3Paddle.offsetLeft &&
-           ballPos.y + stage3Ball.offsetHeight >= playerTop &&
-           ballPos.y <= playerTop + stage3Paddle.offsetHeight){
-            ballSpeedX3*=-1; ballPos.x = stage3Paddle.offsetLeft - stage3Ball.offsetWidth;
+        ballPos.x += ballSpeedX3;
+        ballPos.y += ballSpeedY3;
+
+        if(ballPos.y <=0 || ballPos.y+stage3Ball.offsetHeight>=stage3Area.offsetHeight) ballSpeedY3*=-1;
+
+        // Paddle jugador colision
+        const paddleRect = stage3Paddle.getBoundingClientRect();
+        const ballRect = stage3Ball.getBoundingClientRect();
+        const areaRect = stage3Area.getBoundingClientRect();
+        const melvinRect = stage3Melvin.getBoundingClientRect();
+
+        if(ballRect.right >= paddleRect.left && ballRect.bottom >= paddleRect.top && ballRect.top <= paddleRect.bottom){
+            ballSpeedX3*=-1; ballPos.x=paddleRect.left - stage3Ball.offsetWidth - areaRect.left;
         }
 
-        // Rebote Melvin
-        let melvinTop=parseFloat(stage3Melvin.style.top);
-        if(ballPos.x <= stage3Melvin.offsetWidth &&
-           ballPos.y + stage3Ball.offsetHeight >= melvinTop &&
-           ballPos.y <= melvinTop + stage3Melvin.offsetHeight){
-            ballSpeedX3*=-1; ballPos.x = stage3Melvin.offsetWidth;
+        // Melvin colision
+        if(ballRect.left <= melvinRect.right && ballRect.bottom >= melvinRect.top && ballRect.top <= melvinRect.bottom){
+            ballSpeedX3*=-1; ballPos.x = melvinRect.right - areaRect.left;
         }
 
-        // Movimiento Melvin simple
-        let melvinCenter = melvinTop + stage3Melvin.offsetHeight/2;
-        let ballCenter = ballPos.y + stage3Ball.offsetHeight/2;
-        if(ballCenter>melvinCenter) stage3Melvin.style.top=Math.min(stage3Area.offsetHeight-stage3Melvin.offsetHeight, melvinTop+2)+'px';
-        if(ballCenter<melvinCenter) stage3Melvin.style.top=Math.max(0, melvinTop-2)+'px';
+        // Movimiento Melvin
+        const melvinCenter = melvinRect.top + melvinRect.height/2 - areaRect.top;
+        const ballCenter = ballPos.y + stage3Ball.offsetHeight/2;
+        if(ballCenter > melvinCenter) stage3Melvin.style.top=Math.min(stage3Area.offsetHeight-stage3Melvin.offsetHeight, parseFloat(stage3Melvin.style.top)+2)+'px';
+        if(ballCenter < melvinCenter) stage3Melvin.style.top=Math.max(0, parseFloat(stage3Melvin.style.top)-2)+'px';
 
         // Derrota
-        if(ballPos.x+stage3Ball.offsetWidth >= stage3Area.offsetWidth){ resetStage3(); return; }
+        if(ballPos.x + stage3Ball.offsetWidth >= stage3Area.offsetWidth){ resetStage3(); return; }
 
         // Victoria
-        if(ballPos.x <= 0){ gameRunning3=false;
+        if(ballPos.x <=0){
+            gameRunning3=false;
             const audio=new Audio('ingaliator-1x1x1x1.mp3'); audio.volume=0.5; audio.play();
-            stage3Melvin.style.filter='hue-rotate(0deg) saturate(10)';
-            stage3Melvin.style.transition='opacity 1s'; stage3Melvin.style.opacity=0;
-            setTimeout(()=>{ stage3Continue.style.transform='translateY(0)'; stage3Continue.style.opacity=1; stage3Continue.style.pointerEvents='auto'; },1000);
+            stage3Melvin.style.filter='hue-rotate(0deg) saturate(10)'; stage3Melvin.style.transition='opacity 1s'; stage3Melvin.style.opacity=0;
+            stage3Continue.style.transform='translateY(0)'; stage3Continue.style.opacity=1; stage3Continue.style.pointerEvents='auto';
         }
 
-        stage3Ball.style.left=ballPos.x+'px'; stage3Ball.style.top=ballPos.y+'px';
+        stage3Ball.style.left=ballPos.x+'px';
+        stage3Ball.style.top=ballPos.y+'px';
         requestAnimationFrame(moveBall);
     }
     moveBall();
 }
 
 function resetStage3(){
-    ballPos={x:stage3Area.offsetWidth/2,y:stage3Area.offsetHeight/2};
-    stage3Ball.style.left='50%'; stage3Ball.style.top='50%';
     ballSpeedX3=4; ballSpeedY3=3;
+    stage3Ball.style.left='50%'; stage3Ball.style.top='50%';
     stage3Melvin.style.top='50%';
 }
 
-stage3Continue.onclick=()=>{ stage3.style.display='none'; /* Cargar etapa 4 */ };
+stage3Continue.onclick=()=>{ stage3.style.display='none'; /* cargar Etapa 4 */ };
 </script>
 
 </body>

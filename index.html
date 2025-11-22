@@ -31,29 +31,33 @@
     #gameArea { display: none; margin-top: 40px; }
 
     .drag {
-        width: 150px;
-        height: 150px;
+        width: 30vw;
+        max-width: 150px;
+        height: 30vw;
+        max-height: 150px;
         border-radius: 10px;
         cursor: grab;
         position: relative;
-        margin: 20px;
+        margin: 2vw;
     }
 
     .dropzone {
-        width: 160px;
-        height: 160px;
+        width: 32vw;
+        max-width: 160px;
+        height: 32vw;
+        max-height: 160px;
         border: 3px dashed #888;
         border-radius: 10px;
         display: inline-block;
-        margin: 20px;
+        margin: 2vw;
         background-size: cover;
         background-position: center;
     }
 
     #continueBtn {
-        margin-top: 40px;
-        padding: 20px 50px;
-        font-size: 25px;
+        margin-top: 5vw;
+        padding: 15px 40px;
+        font-size: 20px;
         background: #007bff;
         color: white;
         border: none;
@@ -99,9 +103,9 @@
     </div>
 
     <div id="dropContainer">
-        <div class="dropzone" id="drop1" data-match="drag1" style="background-image: url('Screenshot_20251029-231241_1.jpg');"></div>
-        <div class="dropzone" id="drop2" data-match="drag2" style="background-image: url('a47c3705215f5bd024868af6ca9d4999.jpg');"></div>
-        <div class="dropzone" id="drop3" data-match="drag3" style="background-image: url('chatgpt_22oct2025.png');"></div>
+        <div class="dropzone" id="drop1" data-match="drag2" style="background-image: url('Screenshot_20251029-231241_1.jpg');"></div>
+        <div class="dropzone" id="drop2" data-match="drag3" style="background-image: url('a47c3705215f5bd024868af6ca9d4999.jpg');"></div>
+        <div class="dropzone" id="drop3" data-match="drag1" style="background-image: url('chatgpt_22oct2025.png');"></div>
     </div>
 
     <button id="continueBtn">🔒 Continuar</button>
@@ -119,40 +123,74 @@
 
     let correct = 0;
 
-    document.querySelectorAll(".drag").forEach(drag => {
+    const drags = document.querySelectorAll(".drag");
+    const drops = document.querySelectorAll(".dropzone");
+
+    // Drag & Drop para PC
+    drags.forEach(drag => {
         drag.addEventListener("dragstart", e => {
             e.dataTransfer.setData("id", drag.id);
         });
     });
 
-    document.querySelectorAll(".dropzone").forEach(zone => {
+    drops.forEach(zone => {
         zone.addEventListener("dragover", e => e.preventDefault());
 
         zone.addEventListener("drop", e => {
             const droppedId = e.dataTransfer.getData("id");
-
-            if (zone.dataset.match === droppedId) {
-                document.getElementById(droppedId).classList.add("fade");
-                setTimeout(() => {
-                    document.getElementById(droppedId).style.display = "none";
-                }, 600);
-
-                zone.style.border = "3px solid #00cc44";
-                correct++;
-
-                if (correct === 3) {
-                    let btn = document.getElementById("continueBtn");
-                    btn.style.opacity = 1;
-                    btn.style.cursor = "pointer";
-                    btn.style.pointerEvents = "auto";
-                    btn.innerHTML = "Continuar ✔";
-                }
-            } else {
-                document.body.classList.add("shake");
-                setTimeout(() => document.body.classList.remove("shake"), 300);
-            }
+            handleDrop(zone, droppedId);
         });
     });
+
+    // Touch soporte móvil
+    drags.forEach(drag => {
+        drag.addEventListener("touchstart", e => {
+            drag.dataset.touchId = e.target.id;
+        });
+        drag.addEventListener("touchmove", e => {
+            const touch = e.touches[0];
+            drag.style.position = 'absolute';
+            drag.style.left = (touch.clientX - drag.offsetWidth/2) + 'px';
+            drag.style.top = (touch.clientY - drag.offsetHeight/2) + 'px';
+        });
+        drag.addEventListener("touchend", e => {
+            drops.forEach(zone => {
+                const rect = zone.getBoundingClientRect();
+                const touch = e.changedTouches[0];
+                if (touch.clientX >= rect.left && touch.clientX <= rect.right && touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+                    handleDrop(zone, drag.id);
+                    drag.style.position = 'relative';
+                    drag.style.left = '';
+                    drag.style.top = '';
+                } else {
+                    drag.style.position = 'relative';
+                    drag.style.left = '';
+                    drag.style.top = '';
+                }
+            });
+        });
+    });
+
+    function handleDrop(zone, droppedId) {
+        if (zone.dataset.match === droppedId) {
+            document.getElementById(droppedId).classList.add("fade");
+            setTimeout(() => {
+                document.getElementById(droppedId).style.display = "none";
+            }, 600);
+            zone.style.border = "3px solid #00cc44";
+            correct++;
+            if (correct === 3) {
+                const btn = document.getElementById("continueBtn");
+                btn.style.opacity = 1;
+                btn.style.cursor = "pointer";
+                btn.style.pointerEvents = "auto";
+                btn.innerHTML = "Continuar ✔";
+            }
+        } else {
+            document.body.classList.add("shake");
+            setTimeout(() => document.body.classList.remove("shake"), 300);
+        }
+    }
 
     document.getElementById("continueBtn").onclick = () => {
         if (correct < 3) {

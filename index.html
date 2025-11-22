@@ -13,39 +13,33 @@
         user-select: none;
         overflow-x: hidden;
     }
+    button {
+        border: none;
+        border-radius: 10px;
+        transition: 0.2s;
+    }
     #playButton {
         margin-top: 200px;
         padding: 20px 50px;
         font-size: 30px;
         background: #007bff;
         color: white;
-        border: none;
-        border-radius: 10px;
         cursor: pointer;
-        transition: 0.2s;
     }
-    #playButton:hover {
-        background: #0056c7;
-    }
-
-    #gameArea { display: none; margin-top: 40px; }
+    #playButton:hover { background: #0056c7; }
+    #gameArea, #stage2 { display: none; margin-top: 40px; }
 
     .drag {
-        width: 30vw;
-        max-width: 150px;
-        height: 30vw;
-        max-height: 150px;
+        width: 30vw; max-width: 150px;
+        height: 30vw; max-height: 150px;
         border-radius: 10px;
         cursor: grab;
         position: relative;
         margin: 2vw;
     }
-
     .dropzone {
-        width: 32vw;
-        max-width: 160px;
-        height: 32vw;
-        max-height: 160px;
+        width: 32vw; max-width: 160px;
+        height: 32vw; max-height: 160px;
         border: 3px dashed #888;
         border-radius: 10px;
         display: inline-block;
@@ -53,24 +47,17 @@
         background-size: cover;
         background-position: center;
     }
-
     #continueBtn {
         margin-top: 5vw;
         padding: 15px 40px;
         font-size: 20px;
         background: #007bff;
         color: white;
-        border: none;
-        border-radius: 10px;
         cursor: not-allowed;
         opacity: 0.5;
         pointer-events: none;
     }
-
-    .shake {
-        animation: shake 0.3s;
-    }
-
+    .shake { animation: shake 0.3s; }
     @keyframes shake {
         0% { transform: translateX(0px); }
         25% { transform: translateX(-10px); }
@@ -78,129 +65,168 @@
         75% { transform: translateX(-10px); }
         100% { transform: translateX(0px); }
     }
-
-    .fade {
-        animation: fadeOut 0.6s forwards;
-    }
-
-    @keyframes fadeOut {
-        to { opacity: 0; transform: scale(0.5); }
-    }
+    .fade { animation: fadeOut 0.6s forwards; }
+    @keyframes fadeOut { to { opacity: 0; transform: scale(0.5); } }
 </style>
 </head>
 <body>
 
 <button id="playButton">A JUGAR!</button>
 
+<!-- ETAPA 1 -->
 <div id="gameArea">
-
     <h2>Arrastra cada imagen a su pareja correcta</h2>
-
     <div id="dragContainer">
         <img src="Chatgpt111.png" class="drag" draggable="true" id="drag1">
         <img src="Foto de Yugerson XD.jpg" class="drag" draggable="true" id="drag2">
         <img src="IMG_20251028_160719132_BURST001.jpg" class="drag" draggable="true" id="drag3">
     </div>
-
     <div id="dropContainer">
         <div class="dropzone" id="drop1" data-match="drag2" style="background-image: url('Screenshot_20251029-231241_1.jpg');"></div>
         <div class="dropzone" id="drop2" data-match="drag3" style="background-image: url('a47c3705215f5bd024868af6ca9d4999.jpg');"></div>
         <div class="dropzone" id="drop3" data-match="drag1" style="background-image: url('chatgpt_22oct2025.png');"></div>
     </div>
-
     <button id="continueBtn">🔒 Continuar</button>
+</div>
 
+<!-- ETAPA 2 -->
+<div id="stage2">
+    <h2 style="color:black; font-family:Arial, sans-serif;">Ayuda a Chance a disparar su Pistola!</h2>
+    <div id="stage2Images" style="display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:20px; margin-top:20px;">
+        <img src="Chance.png" id="chance" style="width:25vw; max-width:150px;">
+        <img src="Pistola De Chance.png" id="pistola" style="width:20vw; max-width:120px; cursor:pointer; position:relative;">
+        <img src="Bala De Chance .png" id="bala" style="width:10vw; max-width:60px; cursor:grab; position:relative;">
+        <img src="1x1x1x1.png" id="enemigo" style="width:25vw; max-width:150px; position:relative;">
+    </div>
+    <button id="stage2Continue" style="display:none; margin-top:30px; padding:15px 40px; font-size:20px; background: #28a745; color:white; cursor:pointer; transform:translateY(50px); opacity:0; transition:all 0.5s;">Continuar</button>
 </div>
 
 <script>
-    const playButton = document.getElementById("playButton");
-    const gameArea = document.getElementById("gameArea");
+// BOTON A JUGAR
+const playButton = document.getElementById("playButton");
+const gameArea = document.getElementById("gameArea");
+playButton.onclick = () => {
+    playButton.style.display = "none";
+    gameArea.style.display = "block";
+};
 
-    playButton.onclick = () => {
-        playButton.style.display = "none";
-        gameArea.style.display = "block";
-    };
-
-    let correct = 0;
-
-    const drags = document.querySelectorAll(".drag");
-    const drops = document.querySelectorAll(".dropzone");
-
-    // Drag & Drop para PC
-    drags.forEach(drag => {
-        drag.addEventListener("dragstart", e => {
-            e.dataTransfer.setData("id", drag.id);
+// ETAPA 1 LOGICA
+let correct = 0;
+document.querySelectorAll(".drag").forEach(drag => {
+    drag.addEventListener("dragstart", e => e.dataTransfer.setData("id", drag.id));
+    drag.addEventListener("touchstart", e => drag.dataset.touch=true);
+    drag.addEventListener("touchmove", e => {
+        const touch = e.touches[0];
+        drag.style.position = 'absolute';
+        drag.style.left = (touch.clientX - drag.offsetWidth/2) + 'px';
+        drag.style.top = (touch.clientY - drag.offsetHeight/2) + 'px';
+    });
+    drag.addEventListener("touchend", e => {
+        const touch = e.changedTouches[0];
+        document.querySelectorAll(".dropzone").forEach(zone => {
+            const rect = zone.getBoundingClientRect();
+            if(touch.clientX >= rect.left && touch.clientX <= rect.right && touch.clientY >= rect.top && touch.clientY <= rect.bottom){
+                handleDrop(zone, drag.id);
+            } else { drag.style.position='relative'; drag.style.left=''; drag.style.top=''; }
         });
     });
+});
 
-    drops.forEach(zone => {
-        zone.addEventListener("dragover", e => e.preventDefault());
-
-        zone.addEventListener("drop", e => {
-            const droppedId = e.dataTransfer.getData("id");
-            handleDrop(zone, droppedId);
-        });
+document.querySelectorAll(".dropzone").forEach(zone => {
+    zone.addEventListener("dragover", e => e.preventDefault());
+    zone.addEventListener("drop", e => {
+        const droppedId = e.dataTransfer.getData("id");
+        handleDrop(zone, droppedId);
     });
+});
 
-    // Touch soporte móvil
-    drags.forEach(drag => {
-        drag.addEventListener("touchstart", e => {
-            drag.dataset.touchId = e.target.id;
-        });
-        drag.addEventListener("touchmove", e => {
-            const touch = e.touches[0];
-            drag.style.position = 'absolute';
-            drag.style.left = (touch.clientX - drag.offsetWidth/2) + 'px';
-            drag.style.top = (touch.clientY - drag.offsetHeight/2) + 'px';
-        });
-        drag.addEventListener("touchend", e => {
-            drops.forEach(zone => {
-                const rect = zone.getBoundingClientRect();
-                const touch = e.changedTouches[0];
-                if (touch.clientX >= rect.left && touch.clientX <= rect.right && touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
-                    handleDrop(zone, drag.id);
-                    drag.style.position = 'relative';
-                    drag.style.left = '';
-                    drag.style.top = '';
-                } else {
-                    drag.style.position = 'relative';
-                    drag.style.left = '';
-                    drag.style.top = '';
-                }
-            });
-        });
-    });
-
-    function handleDrop(zone, droppedId) {
-        if (zone.dataset.match === droppedId) {
-            document.getElementById(droppedId).classList.add("fade");
-            setTimeout(() => {
-                document.getElementById(droppedId).style.display = "none";
-            }, 600);
-            zone.style.border = "3px solid #00cc44";
-            correct++;
-            if (correct === 3) {
-                const btn = document.getElementById("continueBtn");
-                btn.style.opacity = 1;
-                btn.style.cursor = "pointer";
-                btn.style.pointerEvents = "auto";
-                btn.innerHTML = "Continuar ✔";
-            }
-        } else {
-            document.body.classList.add("shake");
-            setTimeout(() => document.body.classList.remove("shake"), 300);
+function handleDrop(zone, droppedId){
+    if(zone.dataset.match === droppedId){
+        document.getElementById(droppedId).classList.add("fade");
+        setTimeout(()=>document.getElementById(droppedId).style.display='none',600);
+        zone.style.border = "3px solid #00cc44";
+        correct++;
+        if(correct===3){
+            const btn=document.getElementById("continueBtn");
+            btn.style.opacity=1; btn.style.cursor='pointer'; btn.style.pointerEvents='auto'; btn.innerHTML='Continuar ✔';
         }
+    } else {
+        document.body.classList.add("shake");
+        setTimeout(()=>document.body.classList.remove("shake"),300);
     }
+}
 
-    document.getElementById("continueBtn").onclick = () => {
-        if (correct < 3) {
-            document.body.classList.add("shake");
-            setTimeout(() => document.body.classList.remove("shake"), 300);
-        } else {
-            alert("Etapa 2 lista (aquí pondremos lo siguiente)");
-        }
-    };
+document.getElementById("continueBtn").onclick = () => {
+    if(correct<3){
+        document.body.classList.add("shake");
+        setTimeout(()=>document.body.classList.remove("shake"),300);
+    } else {
+        showStage2();
+    }
+};
+
+// ETAPA 2
+const stage2 = document.getElementById("stage2");
+const bala = document.getElementById("bala");
+const pistola = document.getElementById("pistola");
+const enemigo = document.getElementById("enemigo");
+const stage2Continue = document.getElementById("stage2Continue");
+
+function showStage2(){ stage2.style.display='block'; window.scrollTo(0,0); }
+
+let balaInPistola = false;
+
+// Drag & Drop bala -> pistola
+function handleDropBala(targetX,targetY){
+    const rect=pistola.getBoundingClientRect();
+    if(targetX>=rect.left && targetX<=rect.right && targetY>=rect.top && targetY<=rect.bottom){
+        bala.style.display='none';
+        balaInPistola=true;
+    }
+}
+
+bala.addEventListener("dragstart", e=>e.dataTransfer.setData("id","bala"));
+[pistola].forEach(zone=>{
+    zone.addEventListener("dragover", e=>e.preventDefault());
+    zone.addEventListener("drop", e=>handleDropBala(e.clientX,e.clientY));
+});
+
+bala.addEventListener("touchmove", e=>{
+    const touch=e.touches[0];
+    bala.style.position='absolute'; bala.style.left=(touch.clientX-bala.offsetWidth/2)+'px';
+    bala.style.top=(touch.clientY-bala.offsetHeight/2)+'px';
+});
+bala.addEventListener("touchend", e=>{
+    const touch=e.changedTouches[0];
+    handleDropBala(touch.clientX,touch.clientY);
+    bala.style.position='relative'; bala.style.left=''; bala.style.top='';
+});
+
+pistola.addEventListener("click", () => {
+    if(!balaInPistola) return;
+    pistola.style.transition='transform 0.5s'; pistola.style.transform='rotate(360deg)';
+    setTimeout(()=>{
+        pistola.style.transform='rotate(0deg)';
+        if(Math.random()<0.875){ disparoExitoso(); } else { alert('Mala suerte, la pistola no disparó'); bala.style.display='block'; balaInPistola=false; }
+    },500);
+});
+
+function disparoExitoso(){
+    pistola.style.transition='transform 0.1s'; pistola.style.transform='rotate(-10deg)';
+    setTimeout(()=>pistola.style.transform='rotate(0deg)',100);
+    const spark=document.createElement('div');
+    spark.style.position='absolute'; spark.style.width='20px'; spark.style.height='20px'; spark.style.background='yellow'; spark.style.borderRadius='50%';
+    spark.style.left=pistola.offsetLeft+pistola.offsetWidth+'px'; spark.style.top=pistola.offsetTop+pistola.offsetHeight/2-10+'px';
+    document.body.appendChild(spark);
+    setTimeout(()=>spark.remove(),500);
+
+    document.body.classList.add('shake'); setTimeout(()=>document.body.classList.remove('shake'),1000);
+    const audio=new Audio('ARGHHH.mp3'); audio.play();
+
+    enemigo.style.transition='opacity 1s'; enemigo.style.opacity=0;
+    setTimeout(()=>{ stage2Continue.style.display='block'; setTimeout(()=>{ stage2Continue.style.transform='translateY(0)'; stage2Continue.style.opacity=1; },50); },1000);
+}
 </script>
 
 </body>
-</html
+</html>

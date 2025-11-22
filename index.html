@@ -222,48 +222,54 @@ function startGame3(){
 
 function gameLoop(){
     if(!gameRunning) return;
-    ballX+=ballSpeedX; ballY+=ballSpeedY;
+    ballX += ballSpeedX;
+    ballY += ballSpeedY;
 
-    if(ballY<=0 || ballY+stage3Ball.offsetHeight>=stage3Area.offsetHeight) ballSpeedY*=-1;
-
-    const paddleRect=stage3Paddle.getBoundingClientRect();
-    const ballRect=stage3Ball.getBoundingClientRect();
-    const melvinRect=stage3Melvin.getBoundingClientRect();
-    const areaRect=stage3Area.getBoundingClientRect();
+    if(ballY <= 0 || ballY + stage3Ball.offsetHeight >= stage3Area.offsetHeight){
+        ballSpeedY *= -1;
+    }
 
     // Rebote jugador
-    if(ballRect.right>=paddleRect.left && ballRect.bottom>=paddleRect.top && ballRect.top<=paddleRect.bottom){
-        ballSpeedX*=-1;
-        let impact=(ballY-(paddleRect.top-areaRect.top+stage3Paddle.offsetHeight/2))/stage3Paddle.offsetHeight;
-        ballSpeedY=impact*4;
-        ballX=paddleRect.left-areaRect.left-stage3Ball.offsetWidth;
+    const paddleTop = stage3Paddle.offsetTop;
+    const paddleBottom = paddleTop + stage3Paddle.offsetHeight;
+    if(ballX + stage3Ball.offsetWidth >= stage3Paddle.offsetLeft &&
+       ballY + stage3Ball.offsetHeight >= paddleTop &&
+       ballY <= paddleBottom){
+        ballSpeedX *= -1;
+        let impact = (ballY + stage3Ball.offsetHeight/2 - (paddleTop + stage3Paddle.offsetHeight/2)) / stage3Paddle.offsetHeight;
+        ballSpeedY = impact * 4;
+        ballX = stage3Paddle.offsetLeft - stage3Ball.offsetWidth;
     }
 
     // Rebote Melvin
-    if(ballRect.left<=melvinRect.right && ballRect.bottom>=melvinRect.top && ballRect.top<=melvinRect.bottom){
-        ballSpeedX*=-1;
-        let impact=(ballY-(melvinRect.top-areaRect.top+stage3Melvin.offsetHeight/2))/stage3Melvin.offsetHeight;
-        ballSpeedY=impact*4;
-        ballX=melvinRect.right-areaRect.left;
+    const melvinTop = stage3Melvin.offsetTop;
+    const melvinBottom = melvinTop + stage3Melvin.offsetHeight;
+    if(ballX <= stage3Melvin.offsetLeft + stage3Melvin.offsetWidth &&
+       ballY + stage3Ball.offsetHeight >= melvinTop &&
+       ballY <= melvinBottom){
+        ballSpeedX *= -1;
+        let impact = (ballY + stage3Ball.offsetHeight/2 - (melvinTop + stage3Melvin.offsetHeight/2)) / stage3Melvin.offsetHeight;
+        ballSpeedY = impact * 4;
+        ballX = stage3Melvin.offsetLeft + stage3Melvin.offsetWidth;
     }
 
-    // MELVIN IA PERFECTO
-    let predictedY=ballY + ballSpeedY*((melvinRect.right-ballX)/ballSpeedX);
-    let targetY=predictedY-stage3Melvin.offsetHeight/2;
-    if(targetY<0) targetY=0;
-    if(targetY>stage3Area.offsetHeight-stage3Melvin.offsetHeight) targetY=stage3Area.offsetHeight-stage3Melvin.offsetHeight;
-    stage3Melvin.style.top=targetY+'px';
+    // IA PERFECTA Melvin
+    let predictedY = ballY + ballSpeedY*((stage3Melvin.offsetLeft + stage3Melvin.offsetWidth - ballX)/ballSpeedX);
+    let targetY = predictedY - stage3Melvin.offsetHeight/2;
+    if(targetY < 0) targetY = 0;
+    if(targetY > stage3Area.offsetHeight - stage3Melvin.offsetHeight) targetY = stage3Area.offsetHeight - stage3Melvin.offsetHeight;
+    stage3Melvin.style.top = targetY + 'px';
 
     // Si toca tu lado -> reinicia
-    if(ballX+stage3Ball.offsetWidth>=stage3Area.offsetWidth){
-        gameRunning=false;
+    if(ballX + stage3Ball.offsetWidth >= stage3Area.offsetWidth){
+        gameRunning = false;
         alert('¡Melvin ganó! Reinicia la etapa.');
-        ballX=stage3Area.offsetWidth/2; ballY=stage3Area.offsetHeight/2;
+        ballX = stage3Area.offsetWidth/2; ballY = stage3Area.offsetHeight/2;
         startGame3();
     }
 
-    stage3Ball.style.left=ballX+'px';
-    stage3Ball.style.top=ballY+'px';
+    stage3Ball.style.left = ballX + 'px';
+    stage3Ball.style.top = ballY + 'px';
 
     requestAnimationFrame(gameLoop);
 }

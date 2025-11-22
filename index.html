@@ -1,39 +1,180 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>El Juego del Grupo</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Juego del Grupo</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+    }
 
-    <style>
-        body {
-            background-color: white;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: Arial, sans-serif;
-        }
+    #playBtn {
+        background-color: #007BFF;
+        color: white;
+        padding: 20px 40px;
+        font-size: 30px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.2s;
+        position: absolute;
+    }
 
-        .play-button {
-            background-color: #007bff;
-            color: white;
-            padding: 20px 40px;
-            font-size: 24px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
+    #playBtn:hover { background-color: #0056cc; }
 
-        .play-button:hover {
-            background-color: #0056c7;
-        }
-    </style>
+    .drag-container, .drop-container {
+        display: none;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 90%;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .draggable, .dropzone {
+        width: 150px;
+        height: 150px;
+        border-radius: 10px;
+        background-size: cover;
+        background-position: center;
+    }
+
+    .dropzone {
+        border: 3px dashed #999;
+    }
+
+    #continueBtn {
+        display: none;
+        position: absolute;
+        bottom: 40px;
+        background: #007BFF;
+        color: white;
+        border: none;
+        padding: 18px 40px;
+        font-size: 26px;
+        border-radius: 10px;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    @keyframes shake {
+        0% { transform: translate(0px, 0px); }
+        25% { transform: translate(10px, 0px); }
+        50% { transform: translate(-10px, 0px); }
+        75% { transform: translate(10px, 0px); }
+        100% { transform: translate(0px, 0px); }
+    }
+</style>
 </head>
 <body>
 
-    <button class="play-button">A jugar!</button>
+<button id="playBtn">A jugar!</button>
+
+<div class="drag-container" id="dragArea"></div>
+<div class="drop-container" id="dropArea"></div>
+
+<button id="continueBtn">🔒 Continuar</button>
+
+<script>
+let correct = 0;
+
+const draggableImages = [
+    'drag1.png',
+    'drag2.png',
+    'drag3.png'
+];
+
+const dropImages = [
+    'drop1.png',
+    'drop2.png',
+    'drop3.png'
+];
+
+const playBtn = document.getElementById("playBtn");
+const dragArea = document.getElementById("dragArea");
+const dropArea = document.getElementById("dropArea");
+const continueBtn = document.getElementById("continueBtn");
+
+playBtn.onclick = () => {
+    playBtn.style.display = "none";
+    dragArea.style.display = "flex";
+    dropArea.style.display = "flex";
+    continueBtn.style.display = "block";
+    loadGame();
+};
+
+function shakeScreen() {
+    document.body.style.animation = "shake 0.3s";
+    setTimeout(() => document.body.style.animation = "", 300);
+}
+
+function loadGame() {
+    draggableImages.forEach((src, i) => {
+        let img = document.createElement("div");
+        img.classList.add("draggable");
+        img.style.backgroundImage = `url(${src})`;
+        img.draggable = true;
+        img.dataset.id = i;
+        dragArea.appendChild(img);
+
+        img.ondragstart = (e) => {
+            e.dataTransfer.setData("id", i);
+        };
+    });
+
+    dropImages.forEach((src, i) => {
+        let dz = document.createElement("div");
+        dz.classList.add("dropzone");
+        dz.dataset.accept = i;
+        dropArea.appendChild(dz);
+
+        dz.ondragover = (e) => e.preventDefault();
+
+        dz.ondrop = (e) => {
+            let id = e.dataTransfer.getData("id");
+
+            if (id == i) {
+                correct++;
+                dz.style.backgroundImage = `url(${dropImages[i]})`;
+                dz.style.border = "none";
+                fadeOutDragged(id);
+                if (correct === 3) unlock();
+            } else {
+                shakeScreen();
+                resetDrag(id);
+            }
+        };
+    });
+}
+
+function resetDrag(id) {
+    shakeScreen();
+}
+
+function fadeOutDragged(id) {
+    let items = document.querySelectorAll('.draggable');
+    items[id].style.transition = "opacity 0.5s";
+    items[id].style.opacity = 0;
+    setTimeout(() => items[id].remove(), 500);
+}
+
+function unlock() {
+    continueBtn.style.cursor = "pointer";
+    continueBtn.style.opacity = 1;
+    continueBtn.innerHTML = "Continuar ➜";
+    continueBtn.onclick = () => alert("Etapa 2 lista para crear");
+}
+</script>
 
 </body>
 </html>

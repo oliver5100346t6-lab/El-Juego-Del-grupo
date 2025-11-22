@@ -57,7 +57,16 @@ button { border:none; border-radius:10px; transition:0.2s; }
 
 <!-- ETAPA 3 -->
 <div id="stage3">
-<div id="stage3Area" style="position:relative; height:60vh; width:90vw; max-width:600px; margin:0 auto; background:#f0f0f0; overflow:hidden;">
+<div id="stage3Area" style="
+        position:relative; 
+        height:60vh; 
+        width:90vw; 
+        max-width:600px; 
+        margin:80px auto 0 auto; /* <- margen superior aumentado */
+        background:#f0f0f0; 
+        overflow:hidden;
+        border-radius:10px;
+        ">
   <!-- Líneas con margen dinámico -->
   <div id="leftLine" style="position:absolute; left:5%; top:0; width:10px; height:100%; background:blue;"></div>
   <div id="rightLine" style="position:absolute; right:5%; top:0; width:10px; height:100%; background:blue;"></div>
@@ -74,7 +83,8 @@ button { border:none; border-radius:10px; transition:0.2s; }
   <div id="ball" 
        style="position:absolute; width:20px; height:20px; border-radius:50%; background:blue; left:50%; top:50%; transform:translate(-50%, -50%);"></div>
 </div>
-<button id="stage3Continue">Continuar</button>
+
+<button id="stage3Continue" style="margin-top:50px;">Continuar</button>
 </div>
 
 <script>
@@ -87,9 +97,7 @@ playButton.onclick=()=>{playButton.style.display="none"; gameArea.style.display=
 let correct=0;
 const continueBtn=document.getElementById('continueBtn');
 document.querySelectorAll('.drag').forEach(drag=>{
-    // PC drag
     drag.addEventListener('dragstart', e=> e.dataTransfer.setData('id', drag.id));
-    // Touch móvil
     drag.addEventListener('touchstart', e=>{
         drag.classList.add('dragging');
         drag.touchOffsetX=e.touches[0].clientX - drag.getBoundingClientRect().left;
@@ -198,7 +206,6 @@ let ballSpeedX3=4, ballSpeedY3=3, gameRunning3=true;
 
 function showStage3(){ stage3.style.display='block'; window.scrollTo(0,0); startGame3(); }
 
-// Paddle jugador móvil
 function movePlayer(e){
     let y;
     if(e.touches) y=e.touches[0].clientY - stage3Area.getBoundingClientRect().top - stage3Paddle.offsetHeight/2;

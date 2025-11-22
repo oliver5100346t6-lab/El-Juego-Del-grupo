@@ -57,19 +57,20 @@ button { border:none; border-radius:10px; transition:0.2s; }
 
 <!-- ETAPA 3 -->
 <div id="stage3">
-<div id="stage3Area" style="position:relative; height:60vh; width:90vw; margin:0 auto; background:#f0f0f0; overflow:hidden;">
-  <!-- Líneas con margen interno para no estar pegadas -->
+<div id="stage3Area" style="position:relative; height:60vh; width:90vw; max-width:600px; margin:0 auto; background:#f0f0f0; overflow:hidden;">
+  <!-- Líneas con margen dinámico -->
   <div id="leftLine" style="position:absolute; left:5%; top:0; width:10px; height:100%; background:blue;"></div>
   <div id="rightLine" style="position:absolute; right:5%; top:0; width:10px; height:100%; background:blue;"></div>
   
-  <!-- Melvin en el lado izquierdo con margen -->
+  <!-- Melvin en el lado izquierdo -->
   <img src="IMG_20251028_160719132_BURST001.jpg" id="melvin" 
-       style="position:absolute; left:5%; top:50%; transform:translateY(-50%); width:10vw; max-width:100px;">
+       style="position:absolute; left:5%; top:50%; transform:translateY(-50%); width:12vw; max-width:120px;">
 
-  <!-- Paddle jugador con margen del lado derecho -->
+  <!-- Paddle jugador lado derecho -->
   <div id="playerPaddle" 
-       style="position:absolute; right:5%; top:50%; width:20px; height:15%; background:blue; transform:translateY(-50%);"></div>
+       style="position:absolute; right:5%; top:50%; width:20px; height:20%; background:blue; transform:translateY(-50%);"></div>
 
+  <!-- Pelota -->
   <div id="ball" 
        style="position:absolute; width:20px; height:20px; border-radius:50%; background:blue; left:50%; top:50%; transform:translate(-50%, -50%);"></div>
 </div>
@@ -227,7 +228,7 @@ function startGame3(){
         if(ballRect.left<=melvinRect.right && ballRect.bottom>=melvinRect.top && ballRect.top<=melvinRect.bottom){
             ballSpeedX3*=-1; ballPos.x=melvinRect.right-areaRect.left;
         }
-        const melvinCenter=melvinRect.top+melvinRect.height/2-areaRect.top;
+        const melvinCenter=parseFloat(stage3Melvin.style.top)+stage3Melvin.offsetHeight/2-areaRect.top;
         const ballCenter=ballPos.y+stage3Ball.offsetHeight/2;
         if(ballCenter>melvinCenter) stage3Melvin.style.top=Math.min(stage3Area.offsetHeight-stage3Melvin.offsetHeight, parseFloat(stage3Melvin.style.top)+2)+'px';
         if(ballCenter<melvinCenter) stage3Melvin.style.top=Math.max(0, parseFloat(stage3Melvin.style.top)-2)+'px';

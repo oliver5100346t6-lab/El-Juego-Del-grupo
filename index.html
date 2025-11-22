@@ -113,7 +113,7 @@
     <div id="stage2Images" style="display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:20px; margin-top:20px;">
         <img src="Chance.png" id="chance" style="width:25vw; max-width:150px;">
         <img src="Pistola De Chance.png" id="pistola" style="width:20vw; max-width:120px; cursor:pointer; position:relative;">
-        <img src="Bala De Chance .png" id="bala" style="width:10vw; max-width:60px; cursor:grab; position:relative;">
+        <img src="Bala De Chance .png" id="bala" style="width:10vw; max-width:60px; cursor:grab; position:relative;" draggable="true">
         <img src="1x1x1x1.png" id="enemigo" style="width:25vw; max-width:150px; position:relative;">
     </div>
     <button id="stage2Continue">Continuar</button>
@@ -181,6 +181,19 @@ const stage2Continue=document.getElementById('stage2Continue');
 let balaInPistola=false;
 function showStage2(){ stage2.style.display='block'; window.scrollTo(0,0); }
 
+// Drag & Drop para bala hacia pistola
+bala.addEventListener('dragstart', e => e.dataTransfer.setData('id','bala'));
+pistola.addEventListener('dragover', e => e.preventDefault());
+pistola.addEventListener('drop', e => {
+    const id = e.dataTransfer.getData('id');
+    if(id==='bala'){
+        bala.style.display='none';
+        balaInPistola=true;
+        alert('Bala lista para disparar!');
+    }
+});
+
+// Disparo de pistola
 pistola.addEventListener('click',()=>{
     if(!balaInPistola) return;
     pistola.style.transition='transform 0.5s'; pistola.style.transform='rotate(360deg)';

@@ -174,7 +174,6 @@ const stage2Continue=document.getElementById('stage2Continue');
 let balaInPistola=false;
 function showStage2(){ stage2.style.display='block'; window.scrollTo(0,0); }
 
-// Drag & Drop para bala hacia pistola
 bala.addEventListener('dragstart', e => e.dataTransfer.setData('id','bala'));
 pistola.addEventListener('dragover', e => e.preventDefault());
 pistola.addEventListener('drop', e => {
@@ -186,7 +185,6 @@ pistola.addEventListener('drop', e => {
     }
 });
 
-// Disparo de pistola
 pistola.addEventListener('click',()=>{
     if(!balaInPistola) return;
     pistola.style.transition='transform 0.5s'; pistola.style.transform='rotate(360deg)';
@@ -208,63 +206,52 @@ function disparoExitoso(){
 stage2Continue.onclick=()=>{ stage2.style.display='none'; showStage3(); };
 
 // ETAPA 3
-const stage3Area=document.getElementById('stage3Area');
-const stage3ContinueBtn=document.getElementById('stage3Continue');
 const stage3Ball=document.getElementById('ball');
 const stage3Melvin=document.getElementById('melvin');
 const stage3Paddle=document.getElementById('playerPaddle');
-let ballSpeedX=4, ballSpeedY=3, gameRunning=true;
-
-function showStage3(){ document.getElementById('stage3').style.display='block'; window.scrollTo(0,0); startGame3(); }
+let ballSpeedX3=4, ballSpeedY3=3, gameRunning3=true;
+function showStage3(){ stage3.style.display='block'; window.scrollTo(0,0); startGame3(); }
 
 function startGame3(){
-    gameRunning=true;
+    gameRunning3=true;
     let ballPos={x:stage3Area.offsetWidth/2,y:stage3Area.offsetHeight/2};
 
-    // Movimiento jugador
-    function movePlayer(e){
-        let y=e.touches? e.touches[0].clientY-stage3Area.getBoundingClientRect().top-stage3Paddle.offsetHeight/2 : e.clientY-stage3Area.getBoundingClientRect().top-stage3Paddle.offsetHeight/2;
-        if(y<0)y=0; if(y>stage3Area.offsetHeight-stage3Paddle.offsetHeight)y=stage3Area.offsetHeight-stage3Paddle.offsetHeight;
-        stage3Paddle.style.top=y+'px';
-    }
-    document.addEventListener('mousemove',movePlayer);
-    document.addEventListener('touchmove',movePlayer);
-
     function moveBall(){
-        if(!gameRunning)return;
-        ballPos.x+=ballSpeedX; ballPos.y+=ballSpeedY;
-        if(ballPos.y<=0||ballPos.y>=stage3Area.offsetHeight-stage3Ball.offsetHeight) ballSpeedY*=-1;
+        if(!gameRunning3) return;
+        ballPos.x+=ballSpeedX3; ballPos.y+=ballSpeedY3;
+        if(ballPos.y<=0||ballPos.y>=stage3Area.offsetHeight-stage3Ball.offsetHeight) ballSpeedY3*=-1;
 
-        // Rebote jugador
-        if(ballPos.x+stage3Ball.offsetWidth>=stage3Paddle.offsetLeft &&
-           ballPos.y+stage3Ball.offsetHeight>=parseFloat(stage3Paddle.style.top) &&
-           ballPos.y<=parseFloat(stage3Paddle.style.top)+stage3Paddle.offsetHeight){
-            ballSpeedX*=-1;
+        // Paddle jugador
+        let playerTop=parseFloat(stage3Paddle.style.top);
+        if(ballPos.x + stage3Ball.offsetWidth >= stage3Paddle.offsetLeft &&
+           ballPos.y + stage3Ball.offsetHeight >= playerTop &&
+           ballPos.y <= playerTop + stage3Paddle.offsetHeight){
+            ballSpeedX3*=-1; ballPos.x = stage3Paddle.offsetLeft - stage3Ball.offsetWidth;
         }
 
         // Rebote Melvin
-        if(ballPos.x<=stage3Melvin.offsetWidth &&
-           ballPos.y+stage3Ball.offsetHeight>=parseFloat(stage3Melvin.style.top) &&
-           ballPos.y<=parseFloat(stage3Melvin.style.top)+stage3Melvin.offsetHeight){
-            ballSpeedX*=-1;
+        let melvinTop=parseFloat(stage3Melvin.style.top);
+        if(ballPos.x <= stage3Melvin.offsetWidth &&
+           ballPos.y + stage3Ball.offsetHeight >= melvinTop &&
+           ballPos.y <= melvinTop + stage3Melvin.offsetHeight){
+            ballSpeedX3*=-1; ballPos.x = stage3Melvin.offsetWidth;
         }
 
         // Movimiento Melvin simple
-        let melvinCenter=parseFloat(stage3Melvin.style.top)+stage3Melvin.offsetHeight/2;
-        let ballCenter=ballPos.y+stage3Ball.offsetHeight/2;
-        if(ballCenter>melvinCenter) stage3Melvin.style.top=Math.min(stage3Area.offsetHeight-stage3Melvin.offsetHeight, parseFloat(stage3Melvin.style.top)+2)+'px';
-        if(ballCenter<melvinCenter) stage3Melvin.style.top=Math.max(0, parseFloat(stage3Melvin.style.top)-2)+'px';
+        let melvinCenter = melvinTop + stage3Melvin.offsetHeight/2;
+        let ballCenter = ballPos.y + stage3Ball.offsetHeight/2;
+        if(ballCenter>melvinCenter) stage3Melvin.style.top=Math.min(stage3Area.offsetHeight-stage3Melvin.offsetHeight, melvinTop+2)+'px';
+        if(ballCenter<melvinCenter) stage3Melvin.style.top=Math.max(0, melvinTop-2)+'px';
 
         // Derrota
-        if(ballPos.x<=0){ resetStage3(); return; }
+        if(ballPos.x+stage3Ball.offsetWidth >= stage3Area.offsetWidth){ resetStage3(); return; }
 
         // Victoria
-        if(ballPos.x+stage3Ball.offsetWidth>=stage3Area.offsetWidth){
-            gameRunning=false;
+        if(ballPos.x <= 0){ gameRunning3=false;
             const audio=new Audio('ingaliator-1x1x1x1.mp3'); audio.volume=0.5; audio.play();
             stage3Melvin.style.filter='hue-rotate(0deg) saturate(10)';
             stage3Melvin.style.transition='opacity 1s'; stage3Melvin.style.opacity=0;
-            setTimeout(()=>{ stage3ContinueBtn.style.transform='translateY(0)'; stage3ContinueBtn.style.opacity=1; stage3ContinueBtn.style.pointerEvents='auto'; },1000);
+            setTimeout(()=>{ stage3Continue.style.transform='translateY(0)'; stage3Continue.style.opacity=1; stage3Continue.style.pointerEvents='auto'; },1000);
         }
 
         stage3Ball.style.left=ballPos.x+'px'; stage3Ball.style.top=ballPos.y+'px';
@@ -276,10 +263,11 @@ function startGame3(){
 function resetStage3(){
     ballPos={x:stage3Area.offsetWidth/2,y:stage3Area.offsetHeight/2};
     stage3Ball.style.left='50%'; stage3Ball.style.top='50%';
+    ballSpeedX3=4; ballSpeedY3=3;
     stage3Melvin.style.top='50%';
 }
 
-stage3ContinueBtn.onclick=()=>{ stage3.style.display='none'; /* Cargar etapa 4 */ };
+stage3Continue.onclick=()=>{ stage3.style.display='none'; /* Cargar etapa 4 */ };
 </script>
 
 </body>

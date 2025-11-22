@@ -67,6 +67,18 @@
     }
     .fade { animation: fadeOut 0.6s forwards; }
     @keyframes fadeOut { to { opacity: 0; transform: scale(0.5); } }
+    #stage2Continue {
+        display: block;
+        margin: 30px auto 0 auto;
+        padding:15px 40px;
+        font-size:20px;
+        background:#28a745;
+        color:white;
+        cursor:pointer;
+        transform:translateY(50px);
+        opacity:0;
+        transition:all 0.5s;
+    }
 </style>
 </head>
 <body>
@@ -98,7 +110,7 @@
         <img src="Bala De Chance .png" id="bala" style="width:10vw; max-width:60px; cursor:grab; position:relative;">
         <img src="1x1x1x1.png" id="enemigo" style="width:25vw; max-width:150px; position:relative;">
     </div>
-    <button id="stage2Continue" style="display:none; margin-top:30px; padding:15px 40px; font-size:20px; background: #28a745; color:white; cursor:pointer; transform:translateY(50px); opacity:0; transition:all 0.5s;">Continuar</button>
+    <button id="stage2Continue">Continuar</button>
 </div>
 
 <script>
@@ -161,6 +173,9 @@ document.getElementById("continueBtn").onclick = () => {
         document.body.classList.add("shake");
         setTimeout(()=>document.body.classList.remove("shake"),300);
     } else {
+        // Ocultar Etapa 1
+        gameArea.style.display='none';
+        // Mostrar Etapa 2
         showStage2();
     }
 };
@@ -186,10 +201,8 @@ function handleDropBala(targetX,targetY){
 }
 
 bala.addEventListener("dragstart", e=>e.dataTransfer.setData("id","bala"));
-[pistola].forEach(zone=>{
-    zone.addEventListener("dragover", e=>e.preventDefault());
-    zone.addEventListener("drop", e=>handleDropBala(e.clientX,e.clientY));
-});
+pistola.addEventListener("dragover", e=>e.preventDefault());
+pistola.addEventListener("drop", e=>handleDropBala(e.clientX,e.clientY));
 
 bala.addEventListener("touchmove", e=>{
     const touch=e.touches[0];
@@ -214,6 +227,7 @@ pistola.addEventListener("click", () => {
 function disparoExitoso(){
     pistola.style.transition='transform 0.1s'; pistola.style.transform='rotate(-10deg)';
     setTimeout(()=>pistola.style.transform='rotate(0deg)',100);
+
     const spark=document.createElement('div');
     spark.style.position='absolute'; spark.style.width='20px'; spark.style.height='20px'; spark.style.background='yellow'; spark.style.borderRadius='50%';
     spark.style.left=pistola.offsetLeft+pistola.offsetWidth+'px'; spark.style.top=pistola.offsetTop+pistola.offsetHeight/2-10+'px';
@@ -224,7 +238,14 @@ function disparoExitoso(){
     const audio=new Audio('ARGHHH.mp3'); audio.play();
 
     enemigo.style.transition='opacity 1s'; enemigo.style.opacity=0;
-    setTimeout(()=>{ stage2Continue.style.display='block'; setTimeout(()=>{ stage2Continue.style.transform='translateY(0)'; stage2Continue.style.opacity=1; },50); },1000);
+
+    // Desactivar pistola
+    pistola.style.pointerEvents='none';
+
+    setTimeout(()=>{
+        stage2Continue.style.transform='translateY(0)';
+        stage2Continue.style.opacity=1;
+    },1000);
 }
 </script>
 

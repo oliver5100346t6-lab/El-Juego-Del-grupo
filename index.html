@@ -3,177 +3,163 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Juego del Grupo</title>
+<title>El Juego del Grupo</title>
 <style>
     body {
-        margin: 0;
-        padding: 0;
         background: white;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
+        margin: 0;
         font-family: Arial, sans-serif;
-        overflow: hidden;
+        text-align: center;
+        user-select: none;
+        overflow-x: hidden;
     }
-
-    #playBtn {
-        background-color: #007BFF;
-        color: white;
-        padding: 20px 40px;
+    #playButton {
+        margin-top: 200px;
+        padding: 20px 50px;
         font-size: 30px;
+        background: #007bff;
+        color: white;
         border: none;
         border-radius: 10px;
         cursor: pointer;
         transition: 0.2s;
-        position: absolute;
+    }
+    #playButton:hover {
+        background: #0056c7;
     }
 
-    #playBtn:hover { background-color: #0056cc; }
+    #gameArea { display: none; margin-top: 40px; }
 
-    .drag-container, .drop-container {
-        display: none;
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 90%;
-        display: flex;
-        justify-content: space-between;
-    }
-
-    .draggable, .dropzone {
+    .drag {
         width: 150px;
         height: 150px;
         border-radius: 10px;
-        background-size: cover;
-        background-position: center;
+        cursor: grab;
+        position: relative;
+        margin: 20px;
     }
 
     .dropzone {
-        border: 3px dashed #999;
+        width: 160px;
+        height: 160px;
+        border: 3px dashed #888;
+        border-radius: 10px;
+        display: inline-block;
+        margin: 20px;
     }
 
     #continueBtn {
-        display: none;
-        position: absolute;
-        bottom: 40px;
-        background: #007BFF;
+        margin-top: 40px;
+        padding: 20px 50px;
+        font-size: 25px;
+        background: #007bff;
         color: white;
         border: none;
-        padding: 18px 40px;
-        font-size: 26px;
         border-radius: 10px;
         cursor: not-allowed;
-        opacity: 0.6;
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .shake {
+        animation: shake 0.3s;
     }
 
     @keyframes shake {
-        0% { transform: translate(0px, 0px); }
-        25% { transform: translate(10px, 0px); }
-        50% { transform: translate(-10px, 0px); }
-        75% { transform: translate(10px, 0px); }
-        100% { transform: translate(0px, 0px); }
+        0% { transform: translateX(0px); }
+        25% { transform: translateX(-10px); }
+        50% { transform: translateX(10px); }
+        75% { transform: translateX(-10px); }
+        100% { transform: translateX(0px); }
+    }
+
+    .fade {
+        animation: fadeOut 0.6s forwards;
+    }
+
+    @keyframes fadeOut {
+        to { opacity: 0; transform: scale(0.5); }
     }
 </style>
 </head>
 <body>
 
-<button id="playBtn">A jugar!</button>
+<button id="playButton">A JUGAR!</button>
 
-<div class="drag-container" id="dragArea"></div>
-<div class="drop-container" id="dropArea"></div>
+<div id="gameArea">
 
-<button id="continueBtn">🔒 Continuar</button>
+    <h2>Arrastra cada imagen a su pareja correcta</h2>
+
+    <div id="dragContainer">
+        <img src="Chatgpt111.png" class="drag" draggable="true" id="drag1">
+        <img src="Foto de Yugerson XD.jpg" class="drag" draggable="true" id="drag2">
+        <img src="IMG_20251028_160719132_BURST001.jpg" class="drag" draggable="true" id="drag3">
+    </div>
+
+    <div id="dropContainer">
+        <div class="dropzone" id="drop1" data-match="drag1"></div>
+        <div class="dropzone" id="drop2" data-match="drag2"></div>
+        <div class="dropzone" id="drop3" data-match="drag3"></div>
+    </div>
+
+    <button id="continueBtn">🔒 Continuar</button>
+
+</div>
 
 <script>
-let correct = 0;
+    const playButton = document.getElementById("playButton");
+    const gameArea = document.getElementById("gameArea");
 
-const draggableImages = [
-    'ChatGPT Image 22 oct 2025, 19_57_40.png',
-    'ChatGPT Image 8 sept 2025, 22_23_08.png',
-    'Foto de Yugerson XD.jpg'
-];
+    playButton.onclick = () => {
+        playButton.style.display = "none";
+        gameArea.style.display = "block";
+    };
 
-const dropImages = [
-    'IMG_20251028_160719132_BURST001.jpg',
-    'Screenshot_20251029-231241_1.jpg',
-    'a47c3705215f5bd024868af6ca9d4999.jpg'
-];
+    let correct = 0;
 
-const playBtn = document.getElementById("playBtn");
-const dragArea = document.getElementById("dragArea");
-const dropArea = document.getElementById("dropArea");
-const continueBtn = document.getElementById("continueBtn");
-
-playBtn.onclick = () => {
-    playBtn.style.display = "none";
-    dragArea.style.display = "flex";
-    dropArea.style.display = "flex";
-    continueBtn.style.display = "block";
-    loadGame();
-};
-
-function shakeScreen() {
-    document.body.style.animation = "shake 0.3s";
-    setTimeout(() => document.body.style.animation = "", 300);
-}
-
-function loadGame() {
-    draggableImages.forEach((src, i) => {
-        let img = document.createElement("div");
-        img.classList.add("draggable");
-        img.style.backgroundImage = `url(${src})`;
-        img.draggable = true;
-        img.dataset.id = i;
-        dragArea.appendChild(img);
-
-        img.ondragstart = (e) => {
-            e.dataTransfer.setData("id", i);
-        };
+    document.querySelectorAll(".drag").forEach(drag => {
+        drag.addEventListener("dragstart", e => {
+            e.dataTransfer.setData("id", drag.id);
+        });
     });
 
-    dropImages.forEach((src, i) => {
-        let dz = document.createElement("div");
-        dz.classList.add("dropzone");
-        dz.dataset.accept = i;
-        dropArea.appendChild(dz);
+    document.querySelectorAll(".dropzone").forEach(zone => {
+        zone.addEventListener("dragover", e => e.preventDefault());
 
-        dz.ondragover = (e) => e.preventDefault();
+        zone.addEventListener("drop", e => {
+            const droppedId = e.dataTransfer.getData("id");
 
-        dz.ondrop = (e) => {
-            let id = e.dataTransfer.getData("id");
+            if (zone.dataset.match === droppedId) {
+                document.getElementById(droppedId).classList.add("fade");
+                setTimeout(() => {
+                    document.getElementById(droppedId).style.display = "none";
+                }, 600);
 
-            if (id == i) {
+                zone.style.border = "3px solid #00cc44";
                 correct++;
-                dz.style.backgroundImage = `url(${dropImages[i]})`;
-                dz.style.border = "none";
-                fadeOutDragged(id);
-                if (correct === 3) unlock();
+
+                if (correct === 3) {
+                    let btn = document.getElementById("continueBtn");
+                    btn.style.opacity = 1;
+                    btn.style.cursor = "pointer";
+                    btn.style.pointerEvents = "auto";
+                    btn.innerHTML = "Continuar ✔";
+                }
             } else {
-                shakeScreen();
-                resetDrag(id);
+                document.body.classList.add("shake");
+                setTimeout(() => document.body.classList.remove("shake"), 300);
             }
-        };
+        });
     });
-}
 
-function resetDrag(id) {
-    shakeScreen();
-}
-
-function fadeOutDragged(id) {
-    let items = document.querySelectorAll('.draggable');
-    items[id].style.transition = "opacity 0.5s";
-    items[id].style.opacity = 0;
-    setTimeout(() => items[id].remove(), 500);
-}
-
-function unlock() {
-    continueBtn.style.cursor = "pointer";
-    continueBtn.style.opacity = 1;
-    continueBtn.innerHTML = "Continuar ➜";
-    continueBtn.onclick = () => alert("Etapa 2 lista para crear");
-}
+    document.getElementById("continueBtn").onclick = () => {
+        if (correct < 3) {
+            document.body.classList.add("shake");
+            setTimeout(() => document.body.classList.remove("shake"), 300);
+        } else {
+            alert("Etapa 2 lista (aquí pondremos lo siguiente)");
+        }
+    };
 </script>
 
 </body>

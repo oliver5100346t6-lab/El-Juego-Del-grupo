@@ -71,7 +71,7 @@ button { border:none; border-radius:10px; transition:0.2s; }
   <div id="rightLine" style="position:absolute; right:5%; top:0; width:10px; height:100%; background:blue;"></div>
   
   <img src="IMG_20251028_160719132_BURST001.jpg" id="melvin" 
-       style="position:absolute; left:5%; top:50%; transform:translateY(-50%); width:12vw; max-width:120px; transition:top 0.05s;">
+       style="position:absolute; left:5%; top:50%; transform:translateY(-50%); width:12vw; max-width:120px; transition:top 0.1s;">
   
   <div id="playerPaddle" 
        style="position:absolute; right:5%; top:50%; width:20px; height:20%; background:blue; transform:translateY(-50%); touch-action:none;"></div>
@@ -253,19 +253,26 @@ function gameLoop(){
         ballX = stage3Melvin.offsetLeft + stage3Melvin.offsetWidth;
     }
 
-    // IA PERFECTA Melvin
+    // IA PERFECTA LENTA
     let predictedY = ballY + ballSpeedY*((stage3Melvin.offsetLeft + stage3Melvin.offsetWidth - ballX)/ballSpeedX);
     let targetY = predictedY - stage3Melvin.offsetHeight/2;
     if(targetY < 0) targetY = 0;
     if(targetY > stage3Area.offsetHeight - stage3Melvin.offsetHeight) targetY = stage3Area.offsetHeight - stage3Melvin.offsetHeight;
-    stage3Melvin.style.top = targetY + 'px';
+    // Mover lento
+    stage3Melvin.style.top = parseFloat(stage3Melvin.style.top || 0) + (targetY - parseFloat(stage3Melvin.style.top || 0))*0.15 + 'px';
 
-    // Si toca tu lado -> reinicia
+    // Si toca tu lado -> reinicia TODO
     if(ballX + stage3Ball.offsetWidth >= stage3Area.offsetWidth){
-        gameRunning = false;
-        alert('¡Melvin ganó! Reinicia la etapa.');
-        ballX = stage3Area.offsetWidth/2; ballY = stage3Area.offsetHeight/2;
-        startGame3();
+        gameRunning=false;
+        alert('¡Melvin ganó! Reiniciando a Etapa 1.');
+        stage3.style.display='none';
+        stage2.style.display='none';
+        gameArea.style.display='block';
+        correct=0;
+        document.querySelectorAll('.drag').forEach(d=>{ d.style.display='block'; d.classList.remove('fade'); d.style.position=''; d.style.left=''; d.style.top=''; });
+        document.querySelectorAll('.dropzone').forEach(z=>{ z.style.border='3px dashed #888'; });
+        continueBtn.style.opacity=0.5; continueBtn.style.pointerEvents='none'; continueBtn.innerHTML='🔒 Continuar';
+        return;
     }
 
     stage3Ball.style.left = ballX + 'px';

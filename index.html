@@ -16,7 +16,7 @@ button { border:none; border-radius:10px; transition:0.2s; }
 #continueBtn, #stage2Continue, #stage3Continue { margin-top:5vw; padding:15px 40px; font-size:20px; border-radius:10px; opacity:0.5; cursor:not-allowed; pointer-events:none; }
 #stage2Continue, #stage3Continue { background:#28a745; color:white; }
 .shake { animation: shake 0.3s; }
-@keyframes shake {0%{transform:translateX(0px);}25%{transform:translateX(-10px);}50%{transform:translateX(10px);}75%{transform:translateX(-10px);}100%{transform:translateX(0px);}}
+@keyframes shake {0%{transform:translateX(0px);}25%{transform:translateX(-10px);}50%{transform:translateX(10px);}75%{transform:translateX(-10px);}100%{transform:translateX(0px);} }
 .fade { animation: fadeOut 0.6s forwards; }
 @keyframes fadeOut { to{opacity:0; transform:scale(0.5);} }
 #stage2Continue,#stage3Continue{display:block;margin:30px auto 0 auto; transform:translateY(50px); opacity:0; transition:all 0.5s;}
@@ -30,9 +30,9 @@ button { border:none; border-radius:10px; transition:0.2s; }
 <div id="gameArea">
 <h2>Arrastra cada imagen a su pareja correcta</h2>
 <div id="dragContainer">
-<img src="Chatgpt111.png" class="drag" id="drag1">
-<img src="Foto de Yugerson XD.jpg" class="drag" id="drag2">
-<img src="IMG_20251028_160719132_BURST001.jpg" class="drag" id="drag3">
+<img src="Chatgpt111.png" class="drag" id="drag1" draggable="true">
+<img src="Foto de Yugerson XD.jpg" class="drag" id="drag2" draggable="true">
+<img src="IMG_20251028_160719132_BURST001.jpg" class="drag" id="drag3" draggable="true">
 </div>
 <div id="dropContainer">
 <div class="dropzone" id="drop1" data-match="drag2" style="background-image:url('Screenshot_20251029-231241_1.jpg');"></div>
@@ -145,7 +145,10 @@ const pistola=document.getElementById('pistola');
 const enemigo=document.getElementById('enemigo');
 const stage2Continue=document.getElementById('stage2Continue');
 let balaInPistola=false;
+
 function showStage2(){ stage2.style.display='block'; window.scrollTo(0,0);}
+
+// arrastrar bala (touch)
 bala.addEventListener('touchstart', e=>{
     bala.classList.add('dragging'); 
     bala.touchOffsetX=e.touches[0].clientX-bala.getBoundingClientRect().left;
@@ -167,6 +170,8 @@ bala.addEventListener('touchend', e=>{
         bala.style.display='none'; balaInPistola=true; alert('Bala lista para disparar!');
     } else { bala.style.left=''; bala.style.top=''; bala.style.position=''; bala.style.zIndex=''; }
 });
+
+// al hacer click en la pistola, intenta disparar (con probabilidad)
 pistola.addEventListener('click',()=>{
     if(!balaInPistola) return;
     pistola.style.transition='transform 0.5s'; pistola.style.transform='rotate(360deg)';
@@ -176,15 +181,109 @@ pistola.addEventListener('click',()=>{
         else { alert('Mala suerte, la pistola no disparó'); bala.style.display='block'; balaInPistola=false; }
     },500);
 });
+
+/* ---------------------------
+   Función que realiza el disparo real:
+   - crea un proyectil (img)
+   - lo mueve con requestAnimationFrame hacia el enemigo
+   - detecta colisión y ejecuta efecto de impacto
+   --------------------------- */
 function disparoExitoso(){
-    pistola.style.transition='transform 0.1s'; pistola.style.transform='rotate(-10deg)';
-    setTimeout(()=>pistola.style.transform='rotate(0deg)',100);
-    document.body.classList.add('shake'); setTimeout(()=>document.body.classList.remove('shake'),1000);
-    const audio=new Audio('ARGHHH.mp3'); audio.volume=0.5; audio.play();
-    enemigo.style.transition='opacity 1s'; enemigo.style.opacity=0;
+    // evita disparos dobles
     pistola.style.pointerEvents='none';
-    setTimeout(()=>{ stage2Continue.style.transform='translateY(0)'; stage2Continue.style.opacity=1; stage2Continue.style.pointerEvents='auto'; },1000);
+
+    // Crear bala visual
+    const proyectil = document.createElement("img");
+    proyectil.src = "Bala De Chance .png";
+    proyectil.style.position = "absolute";
+    proyectil.style.width = "40px";
+    proyectil.style.height = "auto";
+    proyectil.style.pointerEvents = "none";
+    proyectil.style.zIndex = "2000";
+    document.body.appendChild(proyectil);
+
+    // posición inicial (desde la pistola)
+    const pistRect = pistola.getBoundingClientRect();
+    const initialX = pistRect.right - 8; // justo al lado de la pistola
+    const initialY = pistRect.top + pistRect.height/2 - 12; // centrado verticalmente
+    proyectil.style.left = initialX + "px";
+    proyectil.style.top = initialY + "px";
+
+    // objetivo (centro del enemigo)
+    const enemyRect = enemigo.getBoundingClientRect();
+    const targetX = enemyRect.left + enemyRect.width/2;
+    const targetY = enemyRect.top + enemyRect.height/2;
+
+    // vector dirección y velocidad
+    let px = initialX;
+    let py = initialY;
+    const dx = targetX - px;
+    const dy = targetY - py;
+    const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+    const speedPerFrame = 18; // ajuste: píxeles por frame (sube para bala más rápida)
+    const vx = dx / dist * speedPerFrame;
+    const vy = dy / dist * speedPerFrame;
+
+    // animación con requestAnimationFrame
+    let rafId;
+    function step(){
+        px += vx;
+        py += vy;
+        proyectil.style.left = px + "px";
+        proyectil.style.top = py + "px";
+
+        // actualizar rects para colisión más precisa
+        const pRect = proyectil.getBoundingClientRect();
+        const eRect = enemigo.getBoundingClientRect();
+
+        const hit = !(pRect.right < eRect.left || pRect.left > eRect.right || pRect.bottom < eRect.top || pRect.top > eRect.bottom);
+
+        if(hit){
+            // impacto
+            proyectil.remove();
+            enemigo.style.transition = "opacity 0.6s, transform 0.3s";
+            enemigo.style.opacity = 0;
+            enemigo.style.transform = "scale(0.9)";
+
+            // sonido + pantalla tiembla
+            try{
+                const audio=new Audio('ARGHHH.mp3');
+                audio.volume=0.5;
+                audio.play();
+            }catch(e){ /* si no existe el audio, no bloquea */ }
+
+            document.body.classList.add('shake');
+            setTimeout(()=>document.body.classList.remove('shake'),500);
+
+            // desbloquear continuar
+            setTimeout(()=>{
+                stage2Continue.style.transform='translateY(0)';
+                stage2Continue.style.opacity=1;
+                stage2Continue.style.pointerEvents='auto';
+            },700);
+
+            balaInPistola = false; // la bala ya fue gastada
+            cancelAnimationFrame(rafId);
+            pistola.style.pointerEvents='none'; // ya disparó
+            return;
+        }
+
+        // si sale de pantalla sin impactar, se elimina
+        if(px > window.innerWidth + 200 || py < -200 || py > window.innerHeight + 200){
+            proyectil.remove();
+            // opcional: devolver la bala al inventario (aquí no)
+            balaInPistola = false;
+            pistola.style.pointerEvents='auto';
+            cancelAnimationFrame(rafId);
+            return;
+        }
+
+        rafId = requestAnimationFrame(step);
+    }
+
+    rafId = requestAnimationFrame(step);
 }
+
 stage2Continue.onclick=()=>{ stage2.style.display='none'; showStage3(); }
 
 // ETAPA 3
